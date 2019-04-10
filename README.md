@@ -9,4 +9,6 @@
 - /back
     - back end
 
+## Links
+[Home Page](http://web-int.u-aizu.ac.jp/course/ie-soft1/)
 
