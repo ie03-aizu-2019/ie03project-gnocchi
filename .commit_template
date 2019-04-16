@@ -5,7 +5,7 @@
 # 🔖  :bookmark: バージョンタグ（Version Tag）
 # ✨  :sparkles: 新機能（New Feature）
 # 🐛  :bug: バグ修正（Bagfix）
-# ♻️  :recycle: リファクタリング(Refactoring)
+# ♻️   :recycle: リファクタリング(Refactoring)
 # 📚  :books: ドキュメント（Documentation）
 # 🎨  :art: デザインUI/UX(Accessibility)
 # 🐎  :horse: パフォーマンス（Performance）
@@ -14,7 +14,10 @@
 # 💩  :hankey: 非推奨追加（Deprecation）
 # 🗑️  :wastebasket: 削除（Removal）
 # 🚧  :construction: WIP(Work In Progress)
-# ✎  :pencil2: Typo Fix
+# ✎   :pencil2: Typo Fix
+# ☑   :white_check_mark: Test Upgrade
+# 👷  :construction_worker: Adding CI System
+# 💚  :green_heart: Fixing CI Build
 # watch more (https://gitmoji.carloscuesta.me)
 
 
