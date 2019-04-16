@@ -33,6 +33,8 @@ workflows:
     jobs:
       - test
       - create-PR:
+          requires:
+            - test
           filters:
             branches:
               only: develop
