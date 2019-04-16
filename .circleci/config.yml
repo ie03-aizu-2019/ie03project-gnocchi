@@ -3,7 +3,7 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: circleci/golang:1.9
     working_directory: /go/src/github.com/uzimaru0000/ie03project-gnocchi
@@ -12,3 +12,29 @@ jobs:
       
       - run: make dep
       - run: make test
+  create-PR:
+    docker:
+      - image: circleci/golang:1.9
+    steps:
+      - checkout
+      - run:
+        name: Install hub command
+        command: |
+          curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
+          tar zxf - --strip-components=1 -C /tmp/ && \
+          mv /tmp/bin/hub /usr/local/bin/hub
+      - run:
+        name: Create a pull request
+        command: |
+          hub pull-request --message="Merged develop" --base="ie03-aizu-2019/ie03project-gnocchi:master" --head="uzimaru0000/ie03project-gnocchi:develop"
+
+workflows:
+  version: 2
+  Test_and_CreatePR:
+    jobs:
+      - test
+      - create-PR:
+          filters:
+            branches:
+              only: develop
+        
