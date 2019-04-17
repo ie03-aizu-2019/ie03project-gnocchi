@@ -1,5 +1,7 @@
 package model
 
+import "math"
+
 type Point struct {
 	X float64
 	Y float64
@@ -16,7 +18,18 @@ type Road struct {
 	To   Place
 }
 
+type Query struct {
+	Start string
+	Dest  string
+	Num   int
+}
+
 type datas struct {
-	Places []Place
-	Roads  []Road
+	Places  []Place
+	Roads   []Road
+	Queries []Query
+}
+
+func (p *Point) Length() float64 {
+	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
