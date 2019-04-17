@@ -48,7 +48,7 @@ func getNums(plane string) (int, int, int, int) {
 // 文字列から座標をパースする
 func parcePoint(str string) Point {
 	x, y, _, _ := getNums(str)
-	return Point{X: float32(x), Y: float32(y)}
+	return Point{X: float64(x), Y: float64(y)}
 }
 
 // 文字列配列から地点をパースする
