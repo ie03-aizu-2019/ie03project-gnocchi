@@ -95,6 +95,7 @@ func TestLoadFile(t *testing.T) {
 		"ie03project-gnocchi",
 		"back",
 		"test_data",
+		"phase1",
 		"case1.txt",
 	)
 

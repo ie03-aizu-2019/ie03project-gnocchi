@@ -1,8 +1,8 @@
 package model
 
 type Point struct {
-	X float32
-	Y float32
+	X float64
+	Y float64
 }
 
 type Place struct {
