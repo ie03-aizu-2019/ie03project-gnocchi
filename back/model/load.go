@@ -21,10 +21,18 @@ func Load(path string) (*datas, error) {
 
 	data := &datas{}
 	strs := strings.Split(string(b), "\n")
-	N, M, _, _ := getNums(strs[0])
+	N, M, P, Q := getNums(strs[0])
 
-	data.Places = parcePlace(strs[1 : N+1])
+	data.Places = parcePlace(strs[1:N+1], 0)
 	data.Roads = parceRoad(strs[N+1:M+N+1], data.Places)
+
+	if P != 0 {
+		data.Places = append(data.Places, parcePlace(strs[M+N+1:P+M+N+1], N)...)
+	}
+
+	if Q != 0 {
+		data.Queries = parceQuery(strs[P+M+N+1:])
+	}
 
 	return data, nil
 }
@@ -52,12 +60,14 @@ func parcePoint(str string) Point {
 }
 
 // 文字列配列から地点をパースする
-func parcePlace(plane []string) []Place {
+// plane : 入力された文字列
+// n		 : idの始まり
+func parcePlace(plane []string, n int) []Place {
 	places := make([]Place, len(plane))
 
 	for i, str := range plane {
 		places[i] = Place{
-			Id:    i + 1,
+			Id:    n + i + 1,
 			Coord: parcePoint(str),
 		}
 	}
@@ -79,4 +89,25 @@ func parceRoad(plane []string, places []Place) []Road {
 	}
 
 	return roads
+}
+
+// 文字列配列からクエリをパースする
+func parceQuery(plane []string) []Query {
+	queries := make([]Query, len(plane))
+
+	for i, str := range plane {
+		query := strings.Split(str, " ")
+		num, err := strconv.Atoi(query[2])
+		if err != nil {
+			num = 0
+		}
+		queries[i] = Query{
+			Start: query[0],
+			Dest:  query[1],
+			Num:   num,
+		}
+	}
+
+	return queries
+
 }
