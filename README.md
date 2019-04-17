@@ -8,6 +8,18 @@
     - front end
 - /back
     - back end
+    
+## Set up
+
+```sh
+$ make dep  
+```
+    
+## Run test
+
+```sh
+$ make test
+```
 
 ## Links
 [Home Page](http://web-int.u-aizu.ac.jp/course/ie-soft1/)
