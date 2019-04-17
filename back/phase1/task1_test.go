@@ -1,8 +1,6 @@
 package phase1
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/utils"
@@ -10,21 +8,8 @@ import (
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
 
-func createPath(fileName string) string {
-	return filepath.Join(
-		os.Getenv("GOPATH"),
-		"src",
-		"github.com",
-		"uzimaru0000",
-		"ie03project-gnocchi",
-		"back",
-		"test_data",
-		fileName,
-	)
-}
-
 func pathSelectCase(file string) (*model.Point, error) {
-	path := createPath(file)
+	path := utils.CreatePath(file)
 	datas, err := model.Load(path)
 	if err != nil {
 		return nil, err
