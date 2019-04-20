@@ -23,7 +23,7 @@ func pathSelectCase(file string) (*model.Point, error) {
 	return point, err
 }
 
-func TestCase1(t *testing.T) {
+func TestTask1Case1(t *testing.T) {
 	point, err := pathSelectCase("phase1/case1.txt")
 	ans := model.Point{X: 3.66667, Y: 3.66667}
 	if err != nil {
@@ -35,7 +35,7 @@ func TestCase1(t *testing.T) {
 	}
 }
 
-func TestCase2(t *testing.T) {
+func TestTask2Case2(t *testing.T) {
 	_, err := pathSelectCase("phase1/case2.txt")
 	if err == nil {
 		t.Fatal("Failed")
@@ -46,7 +46,7 @@ func TestCase2(t *testing.T) {
 	}
 }
 
-func TestCase3(t *testing.T) {
+func TestTask3Case3(t *testing.T) {
 	_, err := pathSelectCase("phase1/case3.txt")
 	if err == nil {
 		t.Fatal("Failed")

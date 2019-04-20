@@ -29,10 +29,10 @@ func TestParcePlace(t *testing.T) {
 
 	places := parcePlace(data, 0)
 	ans := []Place{
-		{Id: 1, Coord: Point{X: 0, Y: 0}},
-		{Id: 2, Coord: Point{X: 5, Y: 5}},
-		{Id: 3, Coord: Point{X: 2, Y: 5}},
-		{Id: 4, Coord: Point{X: 7, Y: 1}},
+		{Id: "1", Coord: Point{X: 0, Y: 0}},
+		{Id: "2", Coord: Point{X: 5, Y: 5}},
+		{Id: "3", Coord: Point{X: 2, Y: 5}},
+		{Id: "4", Coord: Point{X: 7, Y: 1}},
 	}
 
 	if len(data) != len(places) {
@@ -53,23 +53,23 @@ func TestParceRoad(t *testing.T) {
 	}
 
 	places := []Place{
-		{Id: 1, Coord: Point{X: 0, Y: 0}},
-		{Id: 2, Coord: Point{X: 5, Y: 5}},
-		{Id: 3, Coord: Point{X: 2, Y: 5}},
-		{Id: 4, Coord: Point{X: 7, Y: 1}},
+		{Id: "1", Coord: Point{X: 0, Y: 0}},
+		{Id: "2", Coord: Point{X: 5, Y: 5}},
+		{Id: "3", Coord: Point{X: 2, Y: 5}},
+		{Id: "4", Coord: Point{X: 7, Y: 1}},
 	}
 
 	roads := parceRoad(data, places)
 	ans := []Road{
 		{
 			Id:   1,
-			From: Place{Id: 1, Coord: Point{X: 0, Y: 0}},
-			To:   Place{Id: 2, Coord: Point{X: 5, Y: 5}},
+			From: Place{Id: "1", Coord: Point{X: 0, Y: 0}},
+			To:   Place{Id: "2", Coord: Point{X: 5, Y: 5}},
 		},
 		{
 			Id:   2,
-			From: Place{Id: 3, Coord: Point{X: 2, Y: 5}},
-			To:   Place{Id: 4, Coord: Point{X: 7, Y: 1}},
+			From: Place{Id: "3", Coord: Point{X: 2, Y: 5}},
+			To:   Place{Id: "4", Coord: Point{X: 7, Y: 1}},
 		},
 	}
 
@@ -126,23 +126,23 @@ func TestLoadFile(t *testing.T) {
 
 	ans := datas{
 		Places: []Place{
-			{Id: 1, Coord: Point{X: 0, Y: 0}},
-			{Id: 2, Coord: Point{X: 5, Y: 5}},
-			{Id: 3, Coord: Point{X: 2, Y: 5}},
-			{Id: 4, Coord: Point{X: 7, Y: 1}},
-			{Id: 5, Coord: Point{X: 3, Y: 2}},
-			{Id: 6, Coord: Point{X: 0, Y: 5}},
+			{Id: "1", Coord: Point{X: 0, Y: 0}},
+			{Id: "2", Coord: Point{X: 5, Y: 5}},
+			{Id: "3", Coord: Point{X: 2, Y: 5}},
+			{Id: "4", Coord: Point{X: 7, Y: 1}},
+			{Id: "5", Coord: Point{X: 3, Y: 2}},
+			{Id: "6", Coord: Point{X: 0, Y: 5}},
 		},
 		Roads: []Road{
 			{
 				Id:   1,
-				From: Place{Id: 1, Coord: Point{X: 0, Y: 0}},
-				To:   Place{Id: 2, Coord: Point{X: 5, Y: 5}},
+				From: Place{Id: "1", Coord: Point{X: 0, Y: 0}},
+				To:   Place{Id: "2", Coord: Point{X: 5, Y: 5}},
 			},
 			{
 				Id:   2,
-				From: Place{Id: 3, Coord: Point{X: 2, Y: 5}},
-				To:   Place{Id: 4, Coord: Point{X: 7, Y: 1}},
+				From: Place{Id: "3", Coord: Point{X: 2, Y: 5}},
+				To:   Place{Id: "4", Coord: Point{X: 7, Y: 1}},
 			},
 		},
 		Queries: []Query{
