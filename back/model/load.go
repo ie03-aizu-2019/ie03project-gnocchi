@@ -67,7 +67,7 @@ func parcePlace(plane []string, n int) []Place {
 
 	for i, str := range plane {
 		places[i] = Place{
-			Id:    n + i + 1,
+			Id:    strconv.Itoa(n + i + 1),
 			Coord: parcePoint(str),
 		}
 	}
