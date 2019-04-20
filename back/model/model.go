@@ -8,7 +8,7 @@ type Point struct {
 }
 
 type Place struct {
-	Id    int
+	Id    string
 	Coord Point
 }
 
