@@ -1,26 +1,40 @@
-package model
+package utils
 
 import (
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
 
-func Load(path string) (*datas, error) {
+type Datas struct {
+	Places  []model.Place
+	Roads   []model.Road
+	Queries []model.Query
+}
+
+// Load file to return content
+func Load(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer file.Close()
 
 	b, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	data := &datas{}
-	strs := strings.Split(string(b), "\n")
+	return string(b), nil
+}
+
+// ParseData is string to datas
+func ParseData(str string) (*Datas, error) {
+	data := &Datas{}
+	strs := strings.Split(str, "\n")
 	N, M, P, Q := getNums(strs[0])
 
 	data.Places = parcePlace(strs[1:N+1], 0)
@@ -54,19 +68,19 @@ func getNums(plane string) (int, int, int, int) {
 }
 
 // 文字列から座標をパースする
-func parcePoint(str string) Point {
+func parcePoint(str string) model.Point {
 	x, y, _, _ := getNums(str)
-	return Point{X: float64(x), Y: float64(y)}
+	return model.Point{X: float64(x), Y: float64(y)}
 }
 
 // 文字列配列から地点をパースする
 // plane : 入力された文字列
 // n		 : idの始まり
-func parcePlace(plane []string, n int) []Place {
-	places := make([]Place, len(plane))
+func parcePlace(plane []string, n int) []model.Place {
+	places := make([]model.Place, len(plane))
 
 	for i, str := range plane {
-		places[i] = Place{
+		places[i] = model.Place{
 			Id:    strconv.Itoa(n + i + 1),
 			Coord: parcePoint(str),
 		}
@@ -76,12 +90,12 @@ func parcePlace(plane []string, n int) []Place {
 }
 
 // 文字列配列から道をパースする
-func parceRoad(plane []string, places []Place) []Road {
-	roads := make([]Road, len(plane))
+func parceRoad(plane []string, places []model.Place) []model.Road {
+	roads := make([]model.Road, len(plane))
 
 	for i, str := range plane {
 		from, to, _, _ := getNums(str)
-		roads[i] = Road{
+		roads[i] = model.Road{
 			Id:   i + 1,
 			From: places[from-1],
 			To:   places[to-1],
@@ -92,8 +106,8 @@ func parceRoad(plane []string, places []Place) []Road {
 }
 
 // 文字列配列からクエリをパースする
-func parceQuery(plane []string) []Query {
-	queries := make([]Query, len(plane))
+func parceQuery(plane []string) []model.Query {
+	queries := make([]model.Query, len(plane))
 
 	for i, str := range plane {
 		query := strings.Split(str, " ")
@@ -101,7 +115,7 @@ func parceQuery(plane []string) []Query {
 		if err != nil {
 			num = 0
 		}
-		queries[i] = Query{
+		queries[i] = model.Query{
 			Start: query[0],
 			Dest:  query[1],
 			Num:   num,
