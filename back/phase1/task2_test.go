@@ -9,7 +9,12 @@ import (
 
 func task2(file string) ([]*model.Place, error) {
 	path := utils.CreatePath(file)
-	datas, err := model.Load(path)
+	str, err := utils.Load(path)
+	if err != nil {
+		return nil, err
+	}
+
+	datas, err := utils.ParseData(str)
 	if err != nil {
 		return nil, err
 	}
