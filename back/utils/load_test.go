@@ -1,9 +1,9 @@
-package model
+package utils
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
 
 func TestGetNums(t *testing.T) {
@@ -28,11 +28,11 @@ func TestParcePlace(t *testing.T) {
 	}
 
 	places := parcePlace(data, 0)
-	ans := []Place{
-		{Id: "1", Coord: Point{X: 0, Y: 0}},
-		{Id: "2", Coord: Point{X: 5, Y: 5}},
-		{Id: "3", Coord: Point{X: 2, Y: 5}},
-		{Id: "4", Coord: Point{X: 7, Y: 1}},
+	ans := []model.Place{
+		{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+		{Id: "2", Coord: model.Point{X: 5, Y: 5}},
+		{Id: "3", Coord: model.Point{X: 2, Y: 5}},
+		{Id: "4", Coord: model.Point{X: 7, Y: 1}},
 	}
 
 	if len(data) != len(places) {
@@ -52,24 +52,24 @@ func TestParceRoad(t *testing.T) {
 		"3 4",
 	}
 
-	places := []Place{
-		{Id: "1", Coord: Point{X: 0, Y: 0}},
-		{Id: "2", Coord: Point{X: 5, Y: 5}},
-		{Id: "3", Coord: Point{X: 2, Y: 5}},
-		{Id: "4", Coord: Point{X: 7, Y: 1}},
+	places := []model.Place{
+		{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+		{Id: "2", Coord: model.Point{X: 5, Y: 5}},
+		{Id: "3", Coord: model.Point{X: 2, Y: 5}},
+		{Id: "4", Coord: model.Point{X: 7, Y: 1}},
 	}
 
 	roads := parceRoad(data, places)
-	ans := []Road{
+	ans := []model.Road{
 		{
 			Id:   1,
-			From: Place{Id: "1", Coord: Point{X: 0, Y: 0}},
-			To:   Place{Id: "2", Coord: Point{X: 5, Y: 5}},
+			From: model.Place{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+			To:   model.Place{Id: "2", Coord: model.Point{X: 5, Y: 5}},
 		},
 		{
 			Id:   2,
-			From: Place{Id: "3", Coord: Point{X: 2, Y: 5}},
-			To:   Place{Id: "4", Coord: Point{X: 7, Y: 1}},
+			From: model.Place{Id: "3", Coord: model.Point{X: 2, Y: 5}},
+			To:   model.Place{Id: "4", Coord: model.Point{X: 7, Y: 1}},
 		},
 	}
 
@@ -92,7 +92,7 @@ func TestQuery(t *testing.T) {
 		"C1000 2 4",
 	}
 
-	ans := []Query{
+	ans := []model.Query{
 		{Start: "1", Dest: "4", Num: 1},
 		{Start: "C1", Dest: "6", Num: 1},
 		{Start: "C1000", Dest: "2", Num: 4},
@@ -112,46 +112,34 @@ func TestQuery(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	gopath := os.Getenv("GOPATH")
-	path := filepath.Join(
-		gopath,
-		"src",
-		"github.com",
-		"uzimaru0000",
-		"ie03project-gnocchi",
-		"back",
-		"test_data",
-		"example.txt",
-	)
-
 	ans := datas{
-		Places: []Place{
-			{Id: "1", Coord: Point{X: 0, Y: 0}},
-			{Id: "2", Coord: Point{X: 5, Y: 5}},
-			{Id: "3", Coord: Point{X: 2, Y: 5}},
-			{Id: "4", Coord: Point{X: 7, Y: 1}},
-			{Id: "5", Coord: Point{X: 3, Y: 2}},
-			{Id: "6", Coord: Point{X: 0, Y: 5}},
+		Places: []model.Place{
+			{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+			{Id: "2", Coord: model.Point{X: 5, Y: 5}},
+			{Id: "3", Coord: model.Point{X: 2, Y: 5}},
+			{Id: "4", Coord: model.Point{X: 7, Y: 1}},
+			{Id: "5", Coord: model.Point{X: 3, Y: 2}},
+			{Id: "6", Coord: model.Point{X: 0, Y: 5}},
 		},
-		Roads: []Road{
+		Roads: []model.Road{
 			{
 				Id:   1,
-				From: Place{Id: "1", Coord: Point{X: 0, Y: 0}},
-				To:   Place{Id: "2", Coord: Point{X: 5, Y: 5}},
+				From: model.Place{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+				To:   model.Place{Id: "2", Coord: model.Point{X: 5, Y: 5}},
 			},
 			{
 				Id:   2,
-				From: Place{Id: "3", Coord: Point{X: 2, Y: 5}},
-				To:   Place{Id: "4", Coord: Point{X: 7, Y: 1}},
+				From: model.Place{Id: "3", Coord: model.Point{X: 2, Y: 5}},
+				To:   model.Place{Id: "4", Coord: model.Point{X: 7, Y: 1}},
 			},
 		},
-		Queries: []Query{
+		Queries: []model.Query{
 			{Start: "C1", Dest: "4", Num: 1},
 			{Start: "2", Dest: "3", Num: 1},
 		},
 	}
 
-	datas, err := Load(path)
+	datas, err := ParseData("4 2 2 2\n0 0\n5 5\n2 5\n7 1\n1 2\n3 4\n3 2\n0 5\nC1 4 1\n2 3 1")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
