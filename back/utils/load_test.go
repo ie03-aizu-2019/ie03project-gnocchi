@@ -112,7 +112,7 @@ func TestQuery(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	ans := datas{
+	ans := Datas{
 		Places: []model.Place{
 			{Id: "1", Coord: model.Point{X: 0, Y: 0}},
 			{Id: "2", Coord: model.Point{X: 5, Y: 5}},
