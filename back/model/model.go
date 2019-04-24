@@ -21,8 +21,8 @@ type Place struct {
 
 type Road struct {
 	Id   int
-	From Place
-	To   Place
+	From *Place
+	To   *Place
 }
 
 type Query struct {
