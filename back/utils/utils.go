@@ -11,7 +11,7 @@ func Round(f float64, n int) float64 {
 }
 
 func NearEqual(a float64, b float64) bool {
-	eps := 10e-7
+	eps := 10e-6
 	t := a - b
 
 	return -eps <= t && t <= eps
