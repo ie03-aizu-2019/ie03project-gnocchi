@@ -29,3 +29,7 @@ func CreatePath(fileName string) string {
 		fileName,
 	)
 }
+
+func Ceil(f float64, n int) float64 {
+	return math.Ceil(f*math.Pow10(n-1)) / math.Pow10(n-1)
+}
