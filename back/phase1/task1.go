@@ -26,7 +26,7 @@ func CheckCrossPoint(road1, road2 *model.Road) (*model.Point, error) {
 		(0 < s && s < 1) && (0 < t && t < 1) {
 		x := road1.From.Coord.X + (road1.To.Coord.X-road1.From.Coord.X)*s
 		y := road1.From.Coord.Y + (road1.To.Coord.Y-road1.From.Coord.Y)*s
-		return &model.Point{X: utils.Round(x, 6), Y: utils.Round(y, 6)}, nil
+		return &model.Point{X: x, Y: y}, nil
 	}
 
 	return nil, errors.New("NA")

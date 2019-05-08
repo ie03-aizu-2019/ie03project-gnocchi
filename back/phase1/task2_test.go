@@ -1,6 +1,7 @@
 package phase1
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
@@ -20,19 +21,12 @@ func task2(file string) string {
 		return err.Error()
 	}
 
-	roads := EnumerateCrossPoints(datas.Roads)
+	_, crossPoints := EnumerateCrossPoints(datas.Roads)
 
+	// p := sorting(crossPoints)
 	var result string
-	crossPoints := make(map[string]*model.Place)
-	for _, road := range roads {
-		if road.From.Id[0] == 'C' {
-			crossPoints[road.From.Id] = road.From
-		}
-	}
-
-	p := sorting(crossPoints)
-	for _, value := range p {
-		result += value.Coord.ToString() + "\n"
+	for _, value := range crossPoints {
+		result += fmt.Sprintf("%s\n", value.Coord.ToString())
 	}
 
 	return result
