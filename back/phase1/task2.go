@@ -7,7 +7,7 @@ import (
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
 
-func EnumerateCrossPoints(roads []*model.Road) []*model.Road {
+func EnumerateCrossPoints(roads []*model.Road) ([]*model.Road, []*model.Place) {
 	crossPoints := []*model.Place{}
 
 	i := 0
@@ -39,7 +39,7 @@ func EnumerateCrossPoints(roads []*model.Road) []*model.Road {
 
 	idReregistration(crossPoints)
 
-	return roads
+	return roads, crossPoints
 }
 
 func remove(s []*model.Road, i int) []*model.Road {
