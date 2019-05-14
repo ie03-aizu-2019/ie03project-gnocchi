@@ -45,17 +45,43 @@ func (pq *PriprityQueue) Pop() interface{} {
 	return item
 }
 
-func (pq *PriprityQueue) update(dist float64, place model.Place) {
+func (pq *PriprityQueue) find(place model.Place) (*Item, error) {
 	for _, item := range *pq {
 		if item.place == place {
-			if item.priority > dist {
-				item.priority = dist
+			return item, nil
+		}
+	}
+	return nil, errors.New("Not found")
+}
+
+func (item *Item) update(dist float64) {
+	item.priority = dist
+}
+
+func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[model.Place]([][]model.Road))) {
+	if dist := item.priority + road.Length(); reachItem.priority > dist {
+		reachItem.update(dist)
+		var route [][]model.Road
+		if len((*routes)[item.place]) > 0 {
+			for _, r := range (*routes)[item.place] {
+				route = append(route, append(r, *road))
 			}
+		} else {
+			route = [][]model.Road{{*road}}
+		}
+		(*routes)[reachItem.place] = route
+
+	} else if reachItem.priority == dist {
+		for _, r := range (*routes)[item.place] {
+			(*routes)[reachItem.place] = append((*routes)[reachItem.place], append(r, *road))
+		}
+		if len((*routes)[item.place]) == 0 {
+			(*routes)[reachItem.place] = append((*routes)[reachItem.place], []model.Road{*road})
 		}
 	}
 }
 
-func CalcShortedtPath(q model.Query, places []*model.Place, roads []*model.Road) (float64, error) {
+func CalcShortestPath(q model.Query, places []*model.Place, roads []*model.Road) (float64, error) {
 	var start, dest *model.Place
 	for _, p := range places {
 		if q.Start == p.Id {
@@ -69,48 +95,57 @@ func CalcShortedtPath(q model.Query, places []*model.Place, roads []*model.Road)
 		return 0, errors.New("NA")
 	}
 
-	shortests := dijkstra(start, places, roads)
-	shortest := shortests[*dest]
-	if shortest >= 1e30 {
+	routes := dijkstra(start, places, roads)
+	if len(routes[*dest]) == 0 {
 		return 0, errors.New("NA")
 	}
 
-	return shortests[*dest], nil
+	dist := 0.0
+	for _, road := range routes[*dest][0] {
+		dist += road.Length()
+	}
+
+	return dist, nil
 }
 
-func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]float64 {
+func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]model.Road) {
 	var inf float64 = 1e30
 	pq := make(PriprityQueue, len(places))
-	shortests := make(map[model.Place]float64, len(places))
+
+	routes := make(map[model.Place]([][]model.Road), len(places))
+
 	for i, place := range places {
 		pq[i] = &Item{
 			place:    *place,
 			priority: inf,
 			index:    i,
 		}
-		shortests[*place] = inf
+		routes[*place] = make([][]model.Road, 0, 5)
+
 		if *place == *start {
 			pq[i].priority = 0
 		}
 	}
-	// shortests[*start] = 0
 	heap.Init(&pq)
 
 	for pq.Len() > 0 {
 		item := heap.Pop(&pq).(*Item)
-		// log.Printf(toString(item))
-		shortests[item.place] = item.priority
+
 		for _, road := range roads {
 			if *road.To == item.place {
-				pq.update(item.priority+road.Length(), *road.From)
+				if reachItem, err := pq.find(*road.From); err == nil {
+					routeUpdate(item, reachItem, road, &routes)
+				}
 			}
 			if *road.From == item.place {
-				pq.update(item.priority+road.Length(), *road.To)
+				if reachItem, err := pq.find(*road.To); err == nil {
+					routeUpdate(item, reachItem, road, &routes)
+				}
 			}
 		}
 		heap.Init(&pq)
 	}
-	return shortests
+	return routes
 }
 
 func roadsToString(rs []*model.Road) string {
