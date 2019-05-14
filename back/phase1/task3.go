@@ -100,16 +100,11 @@ func CalcShortestPath(q model.Query, places []*model.Place, roads []*model.Road)
 		return 0, errors.New("NA")
 	}
 
-	dist := 1e30
-	for _, route := range routes[*dest] {
-		d := 0.0
-		for _, road := range route {
-			d += road.Length()
-		}
-		if d < dist {
-			dist = d
-		}
+	dist := 0.0
+	for _, road := range routes[*dest][0] {
+		dist += road.Length()
 	}
+
 	return dist, nil
 }
 
