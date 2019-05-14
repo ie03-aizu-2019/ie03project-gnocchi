@@ -2,6 +2,7 @@ package phase1
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
@@ -25,7 +26,7 @@ func task3(file string) string {
 
 	var result string
 	for _, query := range datas.Queries {
-		s, err := CalcShortedtPath(*query, append(datas.Places, places...), roads)
+		s, err := CalcShortestPath(*query, append(datas.Places, places...), roads)
 		if err != nil {
 			result += "NA\n"
 		} else {
@@ -56,18 +57,18 @@ func TestDijkstra(t *testing.T) {
 		&model.Road{3, places[2], places[3]},
 	}
 
-	anser := map[model.Place]float64{
-		*places[0]: 1.0,
-		*places[1]: 0,
-		*places[2]: 1.41421356237,
-		*places[3]: 2.41421356237,
-		*places[4]: 1e30,
+	anser := map[model.Place]([][]model.Road){
+		*places[0]: {{*roads[0]}},
+		*places[1]: {},
+		*places[2]: {{*roads[2]}},
+		*places[3]: {{*roads[2], *roads[3]}},
+		*places[4]: {},
 	}
 
 	result := dijkstra(places[1], places, roads)
 
 	for k, v := range anser {
-		if !utils.NearEqual(v, result[k]) {
+		if !reflect.DeepEqual(v, result[k]) {
 			t.Fatal("testdijkstra not equal")
 		}
 	}
