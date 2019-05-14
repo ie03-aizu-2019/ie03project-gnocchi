@@ -69,16 +69,19 @@ func CalcShortedtPath(q model.Query, places []*model.Place, roads []*model.Road)
 		return 0, errors.New("NA")
 	}
 
-	shortests := dijkstra(start, places, roads)
-	shortest := shortests[*dest]
-	if shortest >= 1e30 {
+	route := dijkstra(start, places, roads)
+	if *route[len(roads)-1].To != *dest {
 		return 0, errors.New("NA")
 	}
 
-	return shortests[*dest], nil
+	dist := 0.0
+	for _, r := range route {
+		dist += r.Length()
+	}
+	return dist, nil
 }
 
-func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]float64 {
+func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) []*model.Road {
 	var inf float64 = 1e30
 	pq := make(PriprityQueue, len(places))
 	shortests := make(map[model.Place]float64, len(places))
