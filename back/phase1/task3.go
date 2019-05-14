@@ -55,7 +55,7 @@ func (pq *PriprityQueue) update(dist float64, place model.Place) {
 	}
 }
 
-func CalcShortedtPath(q model.Query, places []*model.Place, roads []*model.Road) (float64, error) {
+func CalcShortestPath(q model.Query, places []*model.Place, roads []*model.Road) (float64, error) {
 	var start, dest *model.Place
 	for _, p := range places {
 		if q.Start == p.Id {
@@ -69,22 +69,31 @@ func CalcShortedtPath(q model.Query, places []*model.Place, roads []*model.Road)
 		return 0, errors.New("NA")
 	}
 
-	route := dijkstra(start, places, roads)
-	if *route[len(roads)-1].To != *dest {
+	routes := dijkstra(start, places, roads)
+	if len(routes[*dest]) == 0 {
 		return 0, errors.New("NA")
 	}
 
 	dist := 0.0
-	for _, r := range route {
-		dist += r.Length()
+	for _, route := range routes[*dest] {
+		d := 0.0
+		for _, road := range route {
+			d += road.Length()
+		}
+		if d < dist {
+			dist = d
+		}
 	}
 	return dist, nil
 }
 
-func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) []*model.Road {
+func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]model.Road) {
 	var inf float64 = 1e30
 	pq := make(PriprityQueue, len(places))
+
 	shortests := make(map[model.Place]float64, len(places))
+	routes := make(map[model.Place]([][]model.Road), len(places))
+
 	for i, place := range places {
 		pq[i] = &Item{
 			place:    *place,
@@ -92,17 +101,18 @@ func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) []
 			index:    i,
 		}
 		shortests[*place] = inf
+		routes[*place] = make([][]model.Road)
+
 		if *place == *start {
 			pq[i].priority = 0
 		}
 	}
-	// shortests[*start] = 0
 	heap.Init(&pq)
 
 	for pq.Len() > 0 {
 		item := heap.Pop(&pq).(*Item)
-		// log.Printf(toString(item))
 		shortests[item.place] = item.priority
+
 		for _, road := range roads {
 			if *road.To == item.place {
 				pq.update(item.priority+road.Length(), *road.From)
@@ -113,7 +123,7 @@ func dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) []
 		}
 		heap.Init(&pq)
 	}
-	return shortests
+	return
 }
 
 func roadsToString(rs []*model.Road) string {
