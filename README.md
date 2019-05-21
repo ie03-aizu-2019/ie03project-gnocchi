@@ -8,13 +8,13 @@
     - front end
 - /back
     - back end
-    
+
 ## Set up
 
 ```sh
-$ make dep  
+$ make dep
 ```
-    
+
 ## Run test
 
 ```sh
