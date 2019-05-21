@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
+	"github.com/uzimaru0000/ie03project-gnocchi/back/utils"
 )
 
 type route struct {
@@ -27,7 +28,7 @@ func EnumerationShortestPath(q model.Query, places []*model.Place, roads []*mode
 		return nil, errors.New("NA")
 	}
 
-	routes := dijkstra(start, places, roads)
+	routes := utils.Dijkstra(start, places, roads)
 	if len(routes[*dest]) == 0 {
 		return nil, errors.New("NA")
 	}
