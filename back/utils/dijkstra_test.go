@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"reflect"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func TestDijkstra(t *testing.T) {
+	log.Println("in testDijkstra")
 
 	places := []*model.Place{
 		&model.Place{"0", model.Point{0, 0}},

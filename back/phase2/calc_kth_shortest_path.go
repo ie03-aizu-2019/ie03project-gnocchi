@@ -48,11 +48,7 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 		}
 	}
 
-	shortests := utils.Dijkstra(start, places, roads)[*dest]
+	result = utils.Dijkstra(start, places, roads)[*dest]
 
-	if len(shortests) == 0 {
-		return
-	}
-
-	return nil
+	return
 }
