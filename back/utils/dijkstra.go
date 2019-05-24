@@ -20,34 +20,39 @@ func (item *Item) update(dist float64) {
 	item.Priority = dist
 }
 
-func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[model.Place]([][]model.Road))) {
+// What is do this function?
+// road:{ to:item, from:reachItem}
+// from:item -> to:reachItem
+// Update to point distance(priority), if it is shorter than the distance to next point.
+// if to point distance equal the form distance, push to routes.
+func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[model.Place]([][]*model.Road))) {
 	if dist := item.Priority + road.Length(); reachItem.Priority > dist {
 		reachItem.update(dist)
-		var route [][]model.Road
+		var route [][]*model.Road
 		if len((*routes)[item.Place]) > 0 {
 			for _, r := range (*routes)[item.Place] {
-				route = append(route, append(r, *road))
+				route = append(route, append(r, road))
 			}
 		} else {
-			route = [][]model.Road{{*road}}
+			route = [][]*model.Road{{road}}
 		}
 		(*routes)[reachItem.Place] = route
 
 	} else if reachItem.Priority == dist {
 		for _, r := range (*routes)[item.Place] {
-			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], append(r, *road))
+			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], append(r, road))
 		}
 		if len((*routes)[item.Place]) == 0 {
-			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], []model.Road{*road})
+			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], []*model.Road{road})
 		}
 	}
 }
 
-func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]model.Road) {
+func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]*model.Road) {
 	var inf float64 = 1e30
 	pq := make(PriorityQueue, len(places))
 
-	routes := make(map[model.Place]([][]model.Road), len(places))
+	routes := make(map[model.Place]([][]*model.Road), len(places))
 
 	for i, place := range places {
 		pq[i] = &Item{
@@ -55,7 +60,7 @@ func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) ma
 			Priority: inf,
 			Index:    i,
 		}
-		routes[*place] = make([][]model.Road, 0, 5)
+		routes[*place] = make([][]*model.Road, 0, 5)
 
 		if *place == *start {
 			pq[i].Priority = 0

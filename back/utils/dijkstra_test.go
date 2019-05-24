@@ -24,11 +24,11 @@ func TestDijkstra(t *testing.T) {
 		&model.Road{3, places[2], places[3]},
 	}
 
-	anser := map[model.Place]([][]model.Road){
-		*places[0]: {{*roads[0]}},
+	anser := map[model.Place]([][]*model.Road){
+		*places[0]: {{roads[0]}},
 		*places[1]: {},
-		*places[2]: {{*roads[2]}},
-		*places[3]: {{*roads[2], *roads[3]}},
+		*places[2]: {{roads[2]}},
+		*places[3]: {{roads[2], roads[3]}},
 		*places[4]: {},
 	}
 
