@@ -10,9 +10,10 @@ import (
 )
 
 type Datas struct {
-	Places  []*model.Place
-	Roads   []*model.Road
-	Queries []*model.Query
+	Places    []*model.Place
+	Roads     []*model.Road
+	AddPlaces []*model.Place
+	Queries   []*model.Query
 }
 
 // Load file to return content
@@ -41,7 +42,7 @@ func ParseData(str string) (*Datas, error) {
 	data.Roads = parceRoad(strs[N+1:M+N+1], data.Places)
 
 	if P != 0 {
-		data.Places = append(data.Places, parcePlace(strs[M+N+1:P+M+N+1], N)...)
+		data.AddPlaces = parcePlace(strs[M+N+1:P+M+N+1], N)
 	}
 
 	if Q != 0 {
