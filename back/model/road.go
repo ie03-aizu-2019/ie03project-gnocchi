@@ -8,13 +8,6 @@ func (r *Road) Length() float64 {
 
 type Roads []*Road
 
-func (rs Roads) Length() (result float64) {
-	for _, r := range rs {
-		result += r.Length()
-	}
-	return
-}
-
 func (rs Roads) Len() int { return len(rs) }
 
 func (rs Roads) Swap(i, j int) {
