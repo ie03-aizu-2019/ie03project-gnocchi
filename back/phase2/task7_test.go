@@ -21,7 +21,7 @@ var place = model.Place{
 	Coord: model.Point{X: 5, Y: 4},
 }
 
-func task8(file string) string {
+func task7(file string) string {
 	str, err := utils.Load(file)
 	if err != nil {
 		return err.Error()
@@ -73,5 +73,5 @@ func TestDistance(t *testing.T) {
 }
 
 func TestCase1(t *testing.T) {
-	utils.Assert("phase2/task8/case1", task8, t)
+	utils.Assert("phase2/task7/case1", task7, t)
 }
