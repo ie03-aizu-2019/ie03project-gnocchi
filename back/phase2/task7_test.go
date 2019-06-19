@@ -72,6 +72,6 @@ func TestDistance(t *testing.T) {
 	}
 }
 
-func TestCase1(t *testing.T) {
+func TestTask7Case1(t *testing.T) {
 	utils.Assert("phase2/task7/case1", task7, t)
 }
