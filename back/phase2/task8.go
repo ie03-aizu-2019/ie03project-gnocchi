@@ -1,7 +1,7 @@
 package phase2
 
 import (
-	"log"
+	"math"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
@@ -10,76 +10,107 @@ type node struct {
 	place *model.Place
 	pre   int
 	low   int
+	conn  []*edge
 }
 
-type connection struct {
-	node    *node
-	connect []*node
+type edge struct {
+	length float64
+	dest   *node
 }
 
-type graph map[string]*connection
+type graph []*node
 
 func createGraph(roads []*model.Road) graph {
-	graph := make(map[string]*connection)
+	places, table := createTable(createMap(roads))
 
-	for _, r := range roads {
-		_, ok := graph[r.From.Id]
-		if !ok {
-			n := &node{
-				place: r.From,
-				pre:   0,
-				low:   0,
-			}
-			graph[r.From.Id] = &connection{
-				node:    n,
-				connect: []*node{},
-			}
-		}
-		graph[r.From.Id].connect = append(graph[r.From.Id].connect,
-			&node{
-				place: r.To,
-				pre:   0,
-				low:   0,
-			},
-		)
+	nodeTable := make(map[string]int)
+	graph := make(graph, len(places))
+	i := 0
+	for id, place := range places {
+		graph[i] = createNode(place)
+		nodeTable[id] = i
+		i++
+	}
 
-		_, ok = graph[r.To.Id]
-		if !ok {
-			n := &node{
-				place: r.To,
-				pre:   0,
-				low:   0,
-			}
-			graph[r.To.Id] = &connection{
-				node:    n,
-				connect: []*node{},
-			}
+	for id, i := range nodeTable {
+		for _, conn := range table[id] {
+			node := graph[nodeTable[conn]]
+			graph[i].conn = append(graph[i].conn, createEdge(places[id], places[conn], node))
 		}
-		graph[r.To.Id].connect = append(graph[r.To.Id].connect,
-			&node{
-				place: r.From,
-				pre:   0,
-				low:   0,
-			},
-		)
 	}
 
 	return graph
 }
 
-func dfs(current *node, pre *node, g graph) graph {
-	if pre != nil {
-		log.Printf("%v", *pre)
-		current.pre = pre.pre + 1
-		current.low = pre.pre + 1
-	}
+func createMap(roads []*model.Road) map[*model.Place][]*model.Place {
+	matrix := make(map[*model.Place][]*model.Place)
 
-	newGraph := g
-	for _, conn := range newGraph[current.place.Id].connect {
-		if conn.pre == 0 {
-			newGraph = dfs(conn, current, newGraph)
+	for _, road := range roads {
+		conn, ok := matrix[road.From]
+		if !ok {
+			matrix[road.From] = []*model.Place{road.To}
+		} else {
+			matrix[road.From] = append(conn, road.To)
+		}
+
+		conn, ok = matrix[road.To]
+		if !ok {
+			matrix[road.To] = []*model.Place{road.From}
+		} else {
+			matrix[road.To] = append(conn, road.From)
 		}
 	}
 
-	return newGraph
+	return matrix
+}
+
+func createTable(placeMap map[*model.Place][]*model.Place) (map[string]*model.Place, map[string][]string) {
+	places := make(map[string]*model.Place)
+	table := make(map[string][]string)
+
+	for key, val := range placeMap {
+		places[key.Id] = key
+		table[key.Id] = make([]string, len(val))
+
+		for i, p := range val {
+			table[key.Id][i] = p.Id
+		}
+	}
+
+	return places, table
+}
+
+func createNode(place *model.Place) *node {
+	return &node{
+		place: place,
+		pre:   -1,
+		low:   -1,
+		conn:  []*edge{},
+	}
+}
+
+func createEdge(from, to *model.Place, dest *node) *edge {
+	return &edge{
+		length: (&model.Road{
+			Id:   0,
+			From: from,
+			To:   to,
+		}).Length(),
+		dest: dest,
+	}
+}
+
+func dfs(current *node, preOrder int) int {
+	current.pre = preOrder
+	current.low = preOrder
+
+	for _, edge := range current.conn {
+		if edge.dest.pre == -1 {
+			preOrder = dfs(edge.dest, preOrder+1)
+		} else {
+			current.low = int(math.Min(float64(edge.dest.low), float64(current.low)))
+		}
+	}
+
+	return preOrder
 }

@@ -31,10 +31,10 @@ func TestCreateGraph(t *testing.T) {
 	}
 
 	graph := createGraph(data.Roads)
-	for place, conn := range graph {
-		t.Logf("%s ->", place)
-		for _, node := range conn.connect {
-			t.Logf("\t%s", node.place.Id)
+	for _, node := range graph {
+		t.Logf("%v ->", node.place.Id)
+		for _, edge := range node.conn {
+			t.Logf("\t%s", edge.dest.place.Id)
 		}
 	}
 }
@@ -62,10 +62,11 @@ func TestDFS(t *testing.T) {
 	if err != nil {
 		t.Fatal("fomat error")
 	}
+
 	graph := createGraph(data.Roads)
 
-	newGraph := dfs(graph["1"].node, nil, graph)
-	for _, conn := range newGraph {
-		t.Logf("%s\n\tpre : %d\n\tlow : %d", conn.node.place.Id, conn.node.pre, conn.node.low)
+	dfs(graph[0], 0)
+	for _, node := range graph {
+		t.Logf("%v -> pre: %d, low: %d", node.place.Id, node.pre, node.low)
 	}
 }
