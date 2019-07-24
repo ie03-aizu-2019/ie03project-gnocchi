@@ -25,7 +25,11 @@ func task8(file string) string {
 	var result string
 	for from, dests := range bridges {
 		for _, to := range dests {
-			result += fmt.Sprintf("%s %s\n", from.Id, to.Id)
+			if from.Id < to.Id {
+				result += fmt.Sprintf("%s %s\n", from.Id, to.Id)
+			} else {
+				result += fmt.Sprintf("%s %s\n", to.Id, from.Id)
+			}
 		}
 	}
 
