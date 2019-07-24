@@ -1,72 +1,41 @@
 package phase2
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/uzimaru0000/ie03project-gnocchi/back/phase1"
 	"github.com/uzimaru0000/ie03project-gnocchi/back/utils"
 )
 
-func TestCreateGraph(t *testing.T) {
-	str := `6 6 4 0
-0 0
-2 5
-4 7
-5 5
-7 1
-9 5
-1 4
-1 6
-2 5
-3 5
-4 6
-4 2
-5 1
-11 5
-5 4
-3 6`
-
-	data, err := utils.ParseData(str)
+func task8(file string) string {
+	str, err := utils.Load(file)
 	if err != nil {
-		t.Fatal("fomat error")
+		return err.Error()
 	}
 
-	graph := createGraph(data.Roads)
-	for _, node := range graph {
-		t.Logf("%v ->", node.place.Id)
-		for _, edge := range node.conn {
-			t.Logf("\t%s", edge.dest.place.Id)
+	datas, err := utils.ParseData(str)
+	if err != nil {
+		return err.Error()
+	}
+
+	roads, _ := phase1.EnumerateCrossPoints(datas.Roads)
+	bridges := DetectBridge(roads)
+
+	var result string
+	for from, dests := range bridges {
+		for _, to := range dests {
+			result += fmt.Sprintf("%s %s\n", from.Id, to.Id)
 		}
 	}
+
+	return result
 }
 
-func TestDFS(t *testing.T) {
-	str := `6 6 4 0
-0 0
-2 5
-4 7
-5 5
-7 1
-9 5
-1 4
-1 6
-2 5
-3 5
-4 6
-4 2
-5 1
-11 5
-5 4
-3 6`
+func TestTask8Case1(t *testing.T) {
+	utils.Assert("phase2/task8/case1", task8, t)
+}
 
-	data, err := utils.ParseData(str)
-	if err != nil {
-		t.Fatal("fomat error")
-	}
-
-	graph := createGraph(data.Roads)
-
-	dfs(graph[0], 0)
-	for _, node := range graph {
-		t.Logf("%v -> pre: %d, low: %d", node.place.Id, node.pre, node.low)
-	}
+func TestTask8Case2(t *testing.T) {
+	utils.Assert("phase2/task8/case2", task8, t)
 }

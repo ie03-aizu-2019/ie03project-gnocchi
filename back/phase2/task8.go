@@ -14,8 +14,9 @@ type node struct {
 }
 
 type edge struct {
-	length float64
-	dest   *node
+	length   float64
+	dest     *node
+	isBridge bool
 }
 
 type graph []*node
@@ -96,21 +97,46 @@ func createEdge(from, to *model.Place, dest *node) *edge {
 			From: from,
 			To:   to,
 		}).Length(),
-		dest: dest,
+		dest:     dest,
+		isBridge: false,
 	}
 }
 
-func dfs(current *node, preOrder int) int {
+func dfs(current *node, parent *node, preOrder int) int {
 	current.pre = preOrder
 	current.low = preOrder
+	preOrder++
 
 	for _, edge := range current.conn {
 		if edge.dest.pre == -1 {
-			preOrder = dfs(edge.dest, preOrder+1)
-		} else {
+			preOrder = dfs(edge.dest, current, preOrder)
+			current.low = int(math.Min(float64(edge.dest.low), float64(current.low)))
+
+			edge.isBridge = edge.dest.low >= edge.dest.pre
+		} else if parent != edge.dest {
 			current.low = int(math.Min(float64(edge.dest.low), float64(current.low)))
 		}
 	}
 
 	return preOrder
+}
+
+func DetectBridge(roads []*model.Road) map[*model.Place][]*model.Place {
+	graph := createGraph(roads)
+	dfs(graph[0], nil, 0)
+
+	bridges := make(map[*model.Place][]*model.Place)
+	for _, node := range graph {
+		for _, edge := range node.conn {
+			if edge.isBridge {
+				_, ok := bridges[node.place]
+				if !ok {
+					bridges[node.place] = []*model.Place{}
+				}
+				bridges[node.place] = append(bridges[node.place], edge.dest.place)
+			}
+		}
+	}
+
+	return bridges
 }
