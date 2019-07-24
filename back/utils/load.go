@@ -36,7 +36,12 @@ func Load(path string) (string, error) {
 func ParseData(str string) (*Datas, error) {
 	data := &Datas{}
 	strs := strings.Split(str, "\n")
-	N, M, P, Q := getNums(strs[0])
+	fN, fM, fP, fQ := getNums(strs[0])
+
+	N := int(fN)
+	M := int(fM)
+	P := int(fP)
+	Q := int(fQ)
 
 	data.Places = parcePlace(strs[1:N+1], 0)
 	data.Roads = parceRoad(strs[N+1:M+N+1], data.Places)
@@ -53,12 +58,12 @@ func ParseData(str string) (*Datas, error) {
 }
 
 // 空白区切りで文字列をパースする
-func getNums(plane string) (int, int, int, int) {
-	nums := make([]int, 4)
+func getNums(plane string) (float64, float64, float64, float64) {
+	nums := make([]float64, 4)
 
 	splited := strings.Split(plane, " ")
 	for i, str := range splited {
-		if n, err := strconv.Atoi(str); err != nil {
+		if n, err := strconv.ParseFloat(str, 64); err != nil {
 			nums[i] = 0
 		} else {
 			nums[i] = n
@@ -95,7 +100,11 @@ func parceRoad(plane []string, places []*model.Place) []*model.Road {
 	roads := make([]*model.Road, len(plane))
 
 	for i, str := range plane {
-		from, to, _, _ := getNums(str)
+		f, t, _, _ := getNums(str)
+
+		from := int(f)
+		to := int(t)
+
 		roads[i] = &model.Road{
 			Id:   i + 1,
 			From: places[from-1],
