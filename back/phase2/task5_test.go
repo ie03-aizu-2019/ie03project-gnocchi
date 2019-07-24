@@ -42,7 +42,6 @@ func task5(file string) string {
 		}
 
 	}
-
 	return result
 }
 
@@ -52,21 +51,21 @@ func TestTask5Case1(t *testing.T) {
 
 func TestAvoidPlaces(t *testing.T) {
 	places := []*model.Place{
-		&model.Place{"0", model.Point{0, 0}},
-		&model.Place{"1", model.Point{1, 0}},
-		&model.Place{"2", model.Point{0, 1}},
-		&model.Place{"3", model.Point{0, 2}},
-		&model.Place{"4", model.Point{2, 2}},
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 0, Y: 1}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
 	}
 
 	avoid := []*model.Road{
-		&model.Road{2, places[1], places[2]},
-		&model.Road{3, places[2], places[3]},
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
 	}
 
 	anser := []*model.Place{
-		&model.Place{"0", model.Point{0, 0}},
-		&model.Place{"4", model.Point{2, 2}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
 	}
 
 	result := avoidPlaces(places, avoid)
@@ -78,58 +77,116 @@ func TestAvoidPlaces(t *testing.T) {
 
 func TestAvoidRoads(t *testing.T) {
 	places := []*model.Place{
-		&model.Place{"0", model.Point{0, 0}},
-		&model.Place{"1", model.Point{1, 0}},
-		&model.Place{"2", model.Point{0, 1}},
-		&model.Place{"3", model.Point{0, 2}},
-		&model.Place{"4", model.Point{2, 2}},
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 0, Y: 1}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
 	}
 	roads := []*model.Road{
-		&model.Road{0, places[0], places[1]},
-		&model.Road{1, places[0], places[2]},
-		&model.Road{2, places[1], places[2]},
-		&model.Road{3, places[2], places[3]},
-		&model.Road{4, places[3], places[4]},
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
 	}
 
 	avoid := []*model.Road{
-		&model.Road{1, places[0], places[2]},
-		&model.Road{2, places[1], places[2]},
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
 	}
 
 	anser := []*model.Road{
-		&model.Road{4, places[3], places[4]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
 	}
 
 	result := avoidRoads(roads, avoid)
 
 	if !reflect.DeepEqual(result, anser) {
-		t.Fatal("test avoidRoads railed!")
+		t.Fatal("test avoidRoads failed!")
 	}
+}
+
+func TestNextPlace(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+	}
+	r := &model.Road{Id: 0, To: places[0], From: places[1]}
+
+	result := nextPlace(places[0], r)
+
+	if !reflect.DeepEqual(result, places[1]) {
+		t.Fatal("test nextPlace faild!")
+	}
+}
+
+func TestAvoidRoad(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 0, Y: 1}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
+	}
+	roads := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
+	}
+
+	avoid := &model.Road{Id: 0, To: places[0], From: places[1]}
+
+	ans := []*model.Road{
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
+	}
+
+	result := avoidRoad(roads, avoid)
+
+	if !reflect.DeepEqual(result, ans) {
+		t.Fatal("test avoidRoad failed!")
+	}
+
 }
 
 func TestJoinRoads(t *testing.T) {
 	places := []*model.Place{
-		&model.Place{"0", model.Point{0, 0}},
-		&model.Place{"1", model.Point{1, 0}},
-		&model.Place{"2", model.Point{0, 1}},
-		&model.Place{"3", model.Point{0, 2}},
-		&model.Place{"4", model.Point{2, 2}},
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 0, Y: 1}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
 	}
 
-	roads := []*model.Road{
-		&model.Road{0, places[0], places[1]},
-		&model.Road{1, places[0], places[2]},
-		&model.Road{2, places[1], places[2]},
-		&model.Road{3, places[2], places[3]},
+	roads := [][]*model.Road{
+		[]*model.Road{
+			&model.Road{Id: 0, To: places[0], From: places[1]},
+			&model.Road{Id: 1, To: places[0], From: places[2]},
+			&model.Road{Id: 2, To: places[1], From: places[2]},
+			&model.Road{Id: 3, To: places[2], From: places[3]},
+		},
+	}
+	head := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
 	}
 
 	tail := [][]*model.Road{
-		roads[2:],
+		[]*model.Road{
+			&model.Road{Id: 2, To: places[1], From: places[2]},
+			&model.Road{Id: 3, To: places[2], From: places[3]},
+		},
 	}
 
-	result := joinRoads(roads[:2], tail)
-	if !reflect.DeepEqual(roads, result[0]) {
+	result := joinRoads(head, tail)
+	if result == nil || !reflect.DeepEqual(roads, result) {
 		t.Fatal("test joinRoads failed!")
 	}
 }
