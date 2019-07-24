@@ -14,6 +14,8 @@ import Point from "./Point";
 type DisplayProps = {
   width: number;
   height: number;
+  viewWidth: number;
+  viewHeight: number;
   places: Place[];
   roads: [number, number][];
   selectPos?: Place;
@@ -23,27 +25,36 @@ type DisplayProps = {
 };
 
 export default ({ dispatcher, ...props }: DisplayProps) => {
+  const placeToSvgSpace = toSvgSpace(
+    [props.width, props.height],
+    [props.viewWidth, props.viewHeight]
+  );
+
   return (
     <svg
-      width="300px"
-      height="300px"
+      width={`${props.viewWidth}px`}
+      height={`${props.viewHeight}px`}
       viewBox={`0 0 ${props.width} ${props.height}`}
       onMouseMove={e =>
         props.isClick
           ? dispatcher(
-              mouseMoveAction({
-                x: (props.width * e.nativeEvent.offsetX) / 300,
-                y: (props.height * e.nativeEvent.offsetY) / 300
-              })
+              mouseMoveAction(
+                placeToSvgSpace({
+                  x: e.nativeEvent.offsetX,
+                  y: e.nativeEvent.offsetY
+                })
+              )
             )
           : null
       }
       onMouseDown={e =>
         dispatcher(
-          mouseClickAction({
-            x: (props.width * e.nativeEvent.offsetX) / 300,
-            y: (props.height * e.nativeEvent.offsetY) / 300
-          })
+          mouseClickAction(
+            placeToSvgSpace({
+              x: e.nativeEvent.offsetX,
+              y: e.nativeEvent.offsetY
+            })
+          )
         )
       }
       onMouseUp={() => dispatcher(mouseUpAction())}
@@ -59,9 +70,10 @@ export default ({ dispatcher, ...props }: DisplayProps) => {
       ))}
       {props.places.map((x, i) => (
         <Point
-          {...x}
+          place={x}
           size={0.1}
           key={i}
+          index={i}
           onMouseDown={e => (
             e.stopPropagation(), dispatcher(selectPointAction(i))
           )}
@@ -69,10 +81,18 @@ export default ({ dispatcher, ...props }: DisplayProps) => {
         />
       ))}
       {props.selectPos ? (
-        <Point {...props.selectPos} size={0.1} color="blue" />
+        <Point place={props.selectPos} size={0.1} color="blue" />
       ) : (
         ""
       )}
     </svg>
   );
 };
+
+const toSvgSpace = ([w, h]: [number, number], [vw, vh]: [number, number]) => ({
+  x,
+  y
+}: Place): Place => ({
+  x: (x / vw) * w,
+  y: (y / vh) * h
+});
