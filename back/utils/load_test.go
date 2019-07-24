@@ -8,7 +8,12 @@ import (
 
 func TestGetNums(t *testing.T) {
 	data := "4 2 0 0"
-	N, M, P, Q := getNums(data)
+	fN, fM, fP, fQ := getNums(data)
+
+	N := int(fN)
+	M := int(fM)
+	P := int(fP)
+	Q := int(fQ)
 
 	if N != 4 || M != 2 || P != 0 || Q != 0 {
 		t.Logf("N = %d", N)
