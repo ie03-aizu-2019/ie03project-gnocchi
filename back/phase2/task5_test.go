@@ -35,7 +35,6 @@ func task5(file string) string {
 		for _, rs := range routes {
 			sum := 0.0
 			for _, r := range rs {
-				// log.Println(r.To.Id, "->", r.From.Id)
 				sum += r.Length()
 			}
 			result += fmt.Sprintf("%.5f\n", sum)

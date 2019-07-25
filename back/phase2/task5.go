@@ -131,7 +131,7 @@ func isUniq(base [][]*model.Road, item []*model.Road) bool {
 
 func road2String(rs []*model.Road) (str string) {
 	for _, r := range rs {
-		str += (r.From).Id + "-" + r.To.Id
+		str += (r.From).Id + "-" + r.To.Id + ", "
 	}
 	return
 }
@@ -225,7 +225,6 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 		for _, r := range baseRoute {
 			notWork := r
 			dijp := places
-			// dijp := avoidPlaces(places, spurRoot, spurNode)
 			dijr := avoidRoads(roads, spurRoot)
 			dijr = avoidRoad(dijr, notWork)
 			if v, ok := visited[*spurNode]; ok {
@@ -233,9 +232,12 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 					dijr = avoidRoad(dijr, visitedRoad)
 				}
 			}
+			log.Printf("spurNode : %s", spurNode.Id)
+			log.Printf("SpurRoot : %s", road2String(spurRoot))
 
 			shortestPath := utils.Dijkstra(spurNode, dijp, dijr)[*dest]
 			if len(shortestPath) == 0 {
+				log.Println("continue-----")
 				spurNode = nextPlace(spurNode, r)
 				spurRoot = append(spurRoot, r)
 				continue
@@ -243,6 +245,7 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 
 			for _, sp := range shortestPath {
 				sproad := append(spurRoot, sp...)
+				log.Printf("sp : %s", road2String(sp))
 				item := &Item{
 					roads:    sproad,
 					priority: roadsLen(sproad),
@@ -252,7 +255,9 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 			}
 			spurNode = nextPlace(spurNode, r)
 			spurRoot = append(spurRoot, r)
+			log.Println("-----")
 		}
+		log.Println("=====")
 	}
 
 	return
