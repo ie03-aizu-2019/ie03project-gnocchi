@@ -100,7 +100,7 @@ func recomendClossPoints(w http.ResponseWriter, query string) {
 		return
 	}
 
-	recomendPoints := phase2.RecomendClossPoint(datas.Roads, datas.Places)
+	recomendPoints := phase2.RecomendClossPoint(datas.Roads, datas.AddPlaces)
 
 	recomendPlaces := []*model.Place{}
 	for i, rp := range recomendPoints {
@@ -108,10 +108,9 @@ func recomendClossPoints(w http.ResponseWriter, query string) {
 			Coord: *rp,
 			Id:    fmt.Sprintf("R%d", i),
 		}
-
 		recomendPlaces = append(recomendPlaces, p)
 	}
-	datas.Places = recomendPlaces
+	datas.Places = append(datas.Places, recomendPlaces...)
 
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
 }
