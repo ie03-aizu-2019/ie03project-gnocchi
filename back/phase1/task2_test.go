@@ -51,23 +51,6 @@ func TestOnTheRoad(t *testing.T) {
 	}
 }
 
-func TestConnectOnRoadPoints(t *testing.T) {
-	str, err := utils.Load(utils.CreatePath("phase1/task2/case1.txt"))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	datas, err := utils.ParseData(str)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	roads := ConnectOnRoadPoints(datas.Roads, datas.Places)
-	for _, r := range roads {
-		t.Logf("%s -> %s", r.From.Id, r.To.Id)
-	}
-}
-
 func TestTask2Case1(t *testing.T) {
 	utils.Assert("phase1/task2/case1", task2, t)
 }
