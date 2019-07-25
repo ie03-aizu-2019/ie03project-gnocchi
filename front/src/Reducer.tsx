@@ -1,8 +1,17 @@
+import { createContext, Dispatch } from "react";
+
 export type Mode = "Add" | "DrawLine" | "Remove" | "Move";
 
 export type Place = {
   x: number;
   y: number;
+  isAdded: boolean;
+};
+
+export type Query = {
+  start: string;
+  end: string;
+  num: number;
 };
 
 export type State = {
@@ -15,6 +24,7 @@ export type State = {
 
   places: Place[];
   roads: [number, number][];
+  queries: Query[];
 };
 
 type MouseMove = {
@@ -56,6 +66,11 @@ type Import = {
   readonly type_: "Import";
 };
 
+type ToAPI = {
+  readonly type_: "ToAPI";
+  newQuery: string;
+};
+
 export type Action =
   | MouseMove
   | MouseUp
@@ -64,7 +79,8 @@ export type Action =
   | ChangeMode
   | InputQuery
   | Export
-  | Import;
+  | Import
+  | ToAPI;
 
 export const init: State = {
   mode: "Add",
@@ -72,7 +88,8 @@ export const init: State = {
   selectPoint: null,
   isClick: false,
   places: [],
-  roads: []
+  roads: [],
+  queries: []
 };
 
 export const mouseMoveAction = (p: Place): MouseMove => ({
@@ -108,29 +125,55 @@ export const exportAction = (): Export => ({ type_: "Export" });
 
 export const importAction = (): Import => ({ type_: "Import" });
 
-const exportQuery = (places: Place[], roads: [number, number][]): string => {
+export const toAPIAction = (q: string): ToAPI => ({
+  type_: "ToAPI",
+  newQuery: q
+});
+
+const exportQuery = (
+  places: Place[],
+  roads: [number, number][],
+  addedPlaces: Place[],
+  queries: Query[]
+): string => {
   const placesStr = places.map(p => `${p.x} ${p.y}`).join("\n");
   const roadsStr = roads.map(([f, t]) => `${f + 1} ${t + 1}`).join("\n");
+  const addedPlacesStr = addedPlaces.map(p => `${p.x} ${p.y}`).join("\n");
+  const queriesStr = queries
+    .map(({ start, end, num }) => `${start} ${end} ${num}`)
+    .join("\n");
 
-  return `${places.length} ${roads.length} 0 0
-${placesStr}
-${roadsStr}`;
+  return `${places.length} ${roads.length} ${addedPlaces.length} ${
+    queries.length
+  }
+${[placesStr, roadsStr, addedPlacesStr, queriesStr].join("\n")}`;
 };
 
-const importQuery = (query: string): [Place[], [number, number][]] => {
+const importQuery = (query: string): [Place[], [number, number][], Query[]] => {
   const lines = query.split("\n");
-  const [p, r] = lines[0].split(" ").map(Number);
+  const [p, r, a, q] = lines[0].split(" ").map(Number);
+
   const places = lines
     .slice(1, p + 1)
     .map(x => x.split(" ").map(Number))
-    .map(([x, y]) => ({ x, y }));
+    .map(([x, y]) => ({ x, y, isAdded: false }));
 
   const roads = lines
     .slice(p + 1, r + p + 1)
     .map(x => x.split(" ").map(Number))
     .map(([f, t]) => [f - 1, t - 1] as [number, number]);
 
-  return [places, roads];
+  const addedPlaces = lines
+    .slice(r + p + 1, r + p + a + 1)
+    .map(x => x.split(" ").map(Number))
+    .map(([x, y]) => ({ x, y, isAdded: true }));
+
+  const queries = lines
+    .slice(r + p + a + 1, r + p + a + q + 1)
+    .map(x => x.split(" "))
+    .map(([s, e, n]) => ({ start: s, end: e, num: Number(n) }));
+
+  return [places.concat(addedPlaces), roads, queries];
 };
 
 export default (state: State, action: Action): State => {
@@ -139,14 +182,31 @@ export default (state: State, action: Action): State => {
       return { ...state, mode: action.mode };
 
     case "InputQuery":
-      return { ...state, testQuery: action.query };
+      return {
+        ...state,
+        testQuery: action.query
+      };
 
     case "Export":
-      return { ...state, testQuery: exportQuery(state.places, state.roads) };
+      return {
+        ...state,
+        testQuery: exportQuery(
+          state.places.filter(x => !x.isAdded),
+          state.roads,
+          state.places.filter(x => x.isAdded),
+          state.queries
+        )
+      };
 
-    case "Import":
+    case "Import": {
       const [places, roads] = importQuery(state.testQuery);
       return { ...state, places, roads };
+    }
+
+    case "ToAPI": {
+      const [places, roads] = importQuery(action.newQuery);
+      return { ...state, places, roads, testQuery: action.newQuery };
+    }
 
     // Modeで挙動を変える
     default:
@@ -157,42 +217,94 @@ export default (state: State, action: Action): State => {
 const modableReduser = (state: State, action: Action): State => {
   if (state.mode === "Add") {
     switch (action.type_) {
-      case "MouseClick":
+      case "MouseClick": {
+        const places = [
+          ...state.places,
+          { x: action.x, y: action.y, isAdded: false }
+        ];
+        const testQuery = exportQuery(
+          places.filter(x => !x.isAdded),
+          state.roads,
+          places.filter(x => x.isAdded),
+          state.queries
+        );
+
         return {
           ...state,
-          places: [...state.places, { x: action.x, y: action.y }]
+          places,
+          testQuery
         };
+      }
+
+      case "SelectPoint": {
+        const places = state.places.map((x, i) =>
+          i === action.pointIndex ? { ...x, isAdded: !x.isAdded } : x
+        );
+        const testQuery = exportQuery(
+          places.filter(x => !x.isAdded),
+          state.roads,
+          places.filter(x => x.isAdded),
+          state.queries
+        );
+
+        return {
+          ...state,
+          places,
+          testQuery
+        };
+      }
     }
   } else if (state.mode === "Remove") {
     switch (action.type_) {
-      case "SelectPoint":
+      case "SelectPoint": {
+        const places = state.places.filter((_, i) => i !== action.pointIndex);
+        const roads = state.roads
+          .filter(
+            x =>
+              !x.map(y => y === action.pointIndex).reduce((acc, y) => acc || y)
+          )
+          .map(
+            x =>
+              x.map(y => (y > action.pointIndex ? y - 1 : y)) as [
+                number,
+                number
+              ]
+          );
+        const testQuery = exportQuery(
+          places.filter(x => !x.isAdded),
+          roads,
+          places.filter(x => x.isAdded),
+          state.queries
+        );
+
         return {
           ...state,
-          places: state.places.filter((_, i) => i !== action.pointIndex),
-          roads: state.roads
-            .filter(
-              x =>
-                !x
-                  .map(y => y === action.pointIndex)
-                  .reduce((acc, y) => acc || y)
-            )
-            .map(
-              x =>
-                x.map(y => (y > action.pointIndex ? y - 1 : y)) as [
-                  number,
-                  number
-                ]
-            )
+          places,
+          roads,
+          testQuery
         };
+      }
     }
   } else if (state.mode === "DrawLine") {
     switch (action.type_) {
       case "SelectPoint":
         if (state.selectPoint !== null) {
+          const roads = [
+            ...state.roads,
+            [state.selectPoint, action.pointIndex] as [number, number]
+          ];
+          const testQuery = exportQuery(
+            state.places.filter(x => !x.isAdded),
+            roads,
+            state.places.filter(x => x.isAdded),
+            state.queries
+          );
+
           return {
             ...state,
             selectPoint: null,
-            roads: [...state.roads, [state.selectPoint, action.pointIndex]]
+            roads,
+            testQuery
           };
         } else {
           return {
@@ -222,14 +334,29 @@ const modableReduser = (state: State, action: Action): State => {
           selectPoint: null
         };
       case "MouseMove":
+        const places = state.places.map((x, i) =>
+          state.selectPoint === i ? { ...x, x: action.x, y: action.y } : x
+        );
+        const testQuery = exportQuery(
+          places.filter(x => !x.isAdded),
+          state.roads,
+          places.filter(x => x.isAdded),
+          state.queries
+        );
+
         return {
           ...state,
-          places: state.places.map((x, i) =>
-            state.selectPoint === i ? { x: action.x, y: action.y } : x
-          )
+          places,
+          testQuery
         };
     }
   }
 
   return state;
 };
+
+type Reducer = {
+  state: State;
+  dispatcher: Dispatch<Action>;
+};
+export const ReducerContext = createContext<Reducer>(null);

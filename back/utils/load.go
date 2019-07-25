@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -134,4 +135,73 @@ func parceQuery(plane []string) []*model.Query {
 
 	return queries
 
+}
+
+func DatasToQuerys(datas Datas) string {
+	placeMap := createPlaceMap(datas.Places)
+
+	placeNum := len(datas.Places)
+	roadNum := len(datas.Roads)
+	addPlaceNum := len(datas.AddPlaces)
+	queryNum := len(datas.Queries)
+
+	places := placesToQuery(datas.Places)
+	roads := roadsToQuery(datas.Roads, placeMap)
+	addPlaces := placesToQuery(datas.AddPlaces)
+	queries := queriesToQuery(datas.Queries)
+
+	template := `%d %d %d %d
+%s%s%s%s`
+
+	return fmt.Sprintf(
+		template,
+		placeNum,
+		roadNum,
+		addPlaceNum,
+		queryNum,
+		places,
+		roads,
+		addPlaces,
+		queries,
+	)
+}
+
+func createPlaceMap(places []*model.Place) map[string]int {
+	placeMap := make(map[string]int)
+
+	for i, p := range places {
+		placeMap[p.Id] = i + 1
+	}
+
+	return placeMap
+}
+
+func placesToQuery(places []*model.Place) string {
+	var result string
+
+	for _, p := range places {
+		result += fmt.Sprintln(p.Coord.ToString())
+	}
+
+	return result
+}
+
+func roadsToQuery(roads []*model.Road, places map[string]int) string {
+	var result string
+
+	for _, r := range roads {
+		result += fmt.Sprintf("%d %d\n", places[r.From.Id], places[r.To.Id])
+	}
+
+	return result
+}
+
+func queriesToQuery(queries []*model.Query) string {
+	var result string
+
+	for _, q := range queries {
+		result += fmt.Sprintln(q.ToString())
+	}
+
+	return result
 }

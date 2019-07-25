@@ -6,7 +6,8 @@ import {
   mouseMoveAction,
   mouseClickAction,
   selectPointAction,
-  mouseUpAction
+  mouseUpAction,
+  ReducerContext
 } from "../Reducer";
 import Line from "./Line";
 import Point from "./Point";
@@ -14,65 +15,82 @@ import Point from "./Point";
 type DisplayProps = {
   width: number;
   height: number;
-  places: Place[];
-  roads: [number, number][];
-  selectPos?: Place;
-  selectPoint?: number;
-  isClick: boolean;
-  dispatcher: (arg0: Action) => void;
+  viewWidth: number;
+  viewHeight: number;
 };
 
-export default ({ dispatcher, ...props }: DisplayProps) => {
+export default ({ ...props }: DisplayProps) => {
+  const { state, dispatcher } = React.useContext(ReducerContext);
+
+  const placeToSvgSpace = toSvgSpace(
+    [props.width, props.height],
+    [props.viewWidth, props.viewHeight]
+  );
+
   return (
     <svg
-      width="300px"
-      height="300px"
+      width={`${props.viewWidth}px`}
+      height={`${props.viewHeight}px`}
       viewBox={`0 0 ${props.width} ${props.height}`}
       onMouseMove={e =>
-        props.isClick
+        state.isClick
           ? dispatcher(
-              mouseMoveAction({
-                x: (props.width * e.nativeEvent.offsetX) / 300,
-                y: (props.height * e.nativeEvent.offsetY) / 300
-              })
+              mouseMoveAction(
+                placeToSvgSpace({
+                  x: e.nativeEvent.offsetX,
+                  y: e.nativeEvent.offsetY,
+                  isAdded: false
+                })
+              )
             )
           : null
       }
       onMouseDown={e =>
         dispatcher(
-          mouseClickAction({
-            x: (props.width * e.nativeEvent.offsetX) / 300,
-            y: (props.height * e.nativeEvent.offsetY) / 300
-          })
+          mouseClickAction(
+            placeToSvgSpace({
+              x: e.nativeEvent.offsetX,
+              y: e.nativeEvent.offsetY,
+              isAdded: false
+            })
+          )
         )
       }
       onMouseUp={() => dispatcher(mouseUpAction())}
       style={{ border: "1px solid black" }}
     >
-      {props.roads.map(([from, to], i) => (
+      {state.roads.map(([from, to], i) => (
         <Line
           key={i}
-          from={props.places[from]}
-          to={props.places[to]}
+          from={state.places[from]}
+          to={state.places[to]}
           width={0.05}
         />
       ))}
-      {props.places.map((x, i) => (
+      {state.places.map((x, i) => (
         <Point
-          {...x}
+          place={x}
           size={0.1}
           key={i}
+          index={i + 1}
           onMouseDown={e => (
             e.stopPropagation(), dispatcher(selectPointAction(i))
           )}
-          color={props.selectPoint === i ? "green" : undefined}
+          color={
+            x.isAdded ? "blue" : state.selectPoint === i ? "green" : undefined
+          }
         />
       ))}
-      {props.selectPos ? (
-        <Point {...props.selectPos} size={0.1} color="blue" />
-      ) : (
-        ""
-      )}
     </svg>
   );
 };
+
+const toSvgSpace = ([w, h]: [number, number], [vw, vh]: [number, number]) => ({
+  x,
+  y,
+  ...p
+}: Place): Place => ({
+  ...p,
+  x: (x / vw) * w,
+  y: (y / vh) * h
+});
