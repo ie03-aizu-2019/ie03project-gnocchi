@@ -79,6 +79,52 @@ func TestTask5Case2(t *testing.T) {
 	}
 }
 
+func TestTask5Case3(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{"1", model.Point{0, 0}},
+		&model.Place{"2", model.Point{0, 1}},
+		&model.Place{"3", model.Point{2, 0}},
+		&model.Place{"4", model.Point{1, 1}},
+		&model.Place{"5", model.Point{1, 3}},
+		&model.Place{"6", model.Point{3, 1}},
+		&model.Place{"7", model.Point{3, 2}},
+	}
+
+	roads := []*model.Road{
+		&model.Road{0, places[0], places[1]},
+		&model.Road{1, places[2], places[0]},
+		&model.Road{2, places[3], places[1]},
+		&model.Road{3, places[3], places[2]},
+		&model.Road{4, places[3], places[4]},
+		&model.Road{5, places[4], places[6]},
+		&model.Road{6, places[5], places[6]},
+		&model.Road{7, places[5], places[3]},
+	}
+
+	q := model.Query{Start: "1", Dest: "5", Num: 4}
+
+	ans := [][]*model.Road{
+		[]*model.Road{roads[0], roads[2], roads[4]},
+		[]*model.Road{roads[1], roads[3], roads[4]},
+		[]*model.Road{roads[0], roads[2], roads[7], roads[6], roads[5]},
+		[]*model.Road{roads[1], roads[3], roads[7], roads[6], roads[5]},
+	}
+
+	result := calcKthShortestPath(q, places, roads)
+
+	for _, rs := range result {
+		str := ""
+		for _, r := range rs {
+			str += fmt.Sprintf("%s -> %s , ", r.From.Id, r.To.Id)
+		}
+	}
+
+	if !reflect.DeepEqual(ans, result) {
+		t.Fatal("not equal task5Case3")
+	}
+
+}
+
 func TestSetVisit(t *testing.T) {
 	mp := map[model.Place]([]*model.Road){}
 	places := []*model.Place{
