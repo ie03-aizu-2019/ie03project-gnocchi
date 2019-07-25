@@ -2,7 +2,6 @@ package phase2
 
 import (
 	"container/heap"
-	"fmt"
 	"log"
 	"reflect"
 
@@ -23,7 +22,7 @@ type PriorityQueue []*Item
 func (pq PriorityQueue) Len() int { return len(pq) }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].priority < pq[j].priority
+	return pq[i].priority > pq[j].priority
 }
 
 // we want the ascending-prioirty queue
@@ -196,10 +195,9 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 	}
 	heap.Init(&pq)
 
-	count := 0
-
 	for pq.Len() > 0 && len(result) < k {
 		baseItem, ok := pq.Pop().(*Item)
+
 		if !ok {
 			log.Print("pop failed")
 		}
@@ -208,13 +206,19 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 			result = append(result, baseRoute)
 			visited = setVisited(visited, baseRoute)
 		} else {
+			// log.Println("not unique!")
 			continue
 		}
-		count++
-		if count > 100 {
-			log.Println("infinity loop!!!!!!")
-			break
-		}
+		// str := ""
+		// for _, br := range baseRoute {
+		// 	str += fmt.Sprintf("%d, ", br.Id)
+		// }
+		// log.Println("base : ", str)
+		// count++
+		// if count > 100 {
+		// 	log.Println("infinity loop!!!!!!")
+		// 	break
+		// }
 
 		spurRoot := []*model.Road{}
 		spurNode := start
@@ -229,26 +233,16 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 					dijr = avoidRoad(dijr, visitedRoad)
 				}
 			}
-			str := ""
-			for _, r := range dijr {
-				str += fmt.Sprintf("%d, ", r.Id)
-			}
-			log.Println("dijr : ", str)
 
 			shortestPath := utils.Dijkstra(spurNode, dijp, dijr)[*dest]
 			if len(shortestPath) == 0 {
+				spurNode = nextPlace(spurNode, r)
+				spurRoot = append(spurRoot, r)
 				continue
 			}
 
 			for _, sp := range shortestPath {
 				sproad := append(spurRoot, sp...)
-				visited = setVisited(visited, sproad)
-				str = ""
-				for _, spr := range sp {
-					str += fmt.Sprintf("%d, ", spr.Id)
-				}
-				log.Println("SpurNode", spurNode.Id, " : ", str)
-				log.Println("------")
 				item := &Item{
 					roads:    sproad,
 					priority: roadsLen(sproad),

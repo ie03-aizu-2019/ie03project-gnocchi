@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-	"log"
 	"reflect"
 	"testing"
 
@@ -106,15 +104,7 @@ func TestDijkstraCase3(t *testing.T) {
 		&model.Road{7, places[5], places[3]},
 	}
 
-	result := Dijkstra(places[1], places, roads)[*places[1]]
-
-	for _, rs := range result {
-		str := ""
-		for _, r := range rs {
-			str += fmt.Sprintf("%d, ", r.Id)
-		}
-		log.Println("result: ", str)
-	}
+	result := Dijkstra(places[1], places, roads)[*places[4]]
 
 	if len(result) != 0 {
 		t.Fatal("dijkstraCase3 Failed")

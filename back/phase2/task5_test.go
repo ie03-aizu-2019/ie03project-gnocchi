@@ -46,9 +46,9 @@ func task5(file string) string {
 	return result
 }
 
-// func TestTask5Case1(t *testing.T) {
-// 	utils.Assert("phase2/task5/case1", task5, t)
-// }
+func TestTask5Case1(t *testing.T) {
+	utils.Assert("phase2/task5/case1", task5, t)
+}
 
 func TestTask5Case2(t *testing.T) {
 	places := []*model.Place{

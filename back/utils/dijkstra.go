@@ -3,6 +3,7 @@ package utils
 import (
 	"container/heap"
 	"errors"
+	"log"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
@@ -86,37 +87,47 @@ func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[mod
 	}
 }
 
+// Dijkstra is algorithm search shortest path to each node from start node
+// args: start, places, roads, return:  map that key is each place which value is shortest route from start
 func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]*model.Road) {
-	var inf float64 = 1e30
+	var inf = 1e30
 	pq := make(PriorityQueue, len(places))
 
 	routes := make(map[model.Place]([][]*model.Road), len(places))
 
+	flg := true
 	for i, place := range places {
 		pq[i] = &Item{
 			Place:    *place,
 			Priority: inf,
 			Index:    i,
 		}
-		routes[*place] = make([][]*model.Road, 0, 5)
+		routes[*place] = make([][]*model.Road, 0)
 
-		if *place == *start {
+		if place.Id == start.Id {
+			flg = false
 			pq[i].Priority = 0
 		}
+	}
+	if flg {
+		log.Println("start not found")
+		return routes
 	}
 	heap.Init(&pq)
 
 	for pq.Len() > 0 {
 		i := heap.Pop(&pq).(*Item)
-
+		if i.Priority == inf {
+			break
+		}
 		for _, road := range roads {
-			if *road.To == i.Place {
+			if road.To.Id == i.Place.Id {
 
 				if reachItem, err := pq.find(*road.From); err == nil {
 					routeUpdate((*Item)(i), reachItem, road, &routes)
 				}
 			}
-			if *road.From == i.Place {
+			if road.From.Id == i.Place.Id {
 				if reachItem, err := pq.find(*road.To); err == nil {
 					routeUpdate((*Item)(i), reachItem, road, &routes)
 				}
