@@ -2,46 +2,64 @@ import * as React from "react";
 import styled from "styled-components";
 
 import {
-  Action,
   importAction,
   exportAction,
-  inputQueryAction
+  inputQueryAction,
+  ReducerContext,
+  toAPIAction,
+  Action
 } from "../Reducer";
 
 import Button from "./Button";
-import FlexBox from "./FlexBox";
 import Grid from "./Grid";
+import Caller, { EnumCrossPoints, RecomendCrossPoints } from "../ApiCall";
 
 type IOProps = {
   query: string;
-  dispatcher: (arg0: Action) => void;
 };
 
-export default ({ query, dispatcher }: IOProps) => {
+const enumCrossPointsCall = async (
+  query: string,
+  dispatcher: React.Dispatch<Action>
+) => {
+  const newQuery = await Caller(EnumCrossPoints, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: query
+  });
+
+  dispatcher(toAPIAction(newQuery));
+};
+
+const recomendCrossPointsCall = async (
+  query: string,
+  dispatcher: React.Dispatch<Action>
+) => {
+  const newQuery = await Caller(RecomendCrossPoints, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: query
+  });
+
+  dispatcher(toAPIAction(newQuery));
+};
+
+export default ({ query }: IOProps) => {
+  const { dispatcher } = React.useContext(ReducerContext);
+
   return (
-    <Grid rows={["32px", "32px", "1fr"]} columns={["1fr", "1fr"]} gap="8px">
-      <Button
-        onClick={() => console.log("API と通信")}
-        style={{ gridRow: "1", gridColumn: "1 / 3" }}
-      >
-        SendData
+    <Grid rows={["32px", "32px", "32px", "1fr"]} columns={["1fr"]} gap="8px">
+      <Button onClick={() => enumCrossPointsCall(query, dispatcher)}>
+        CrossPoints
       </Button>
-      <Button
-        onClick={() => dispatcher(importAction())}
-        style={{ gridRow: "2", gridColumn: "1" }}
-      >
-        Inport
+      <Button onClick={() => recomendCrossPointsCall(query, dispatcher)}>
+        RecomendCrossPoints
       </Button>
-      <Button
-        onClick={() => dispatcher(exportAction())}
-        style={{ gridRow: "2", gridColumn: "2" }}
-      >
-        Export
-      </Button>
+      <Button onClick={() => dispatcher(importAction())}>Inport</Button>
       <Textarea
         value={query}
         onChange={e => dispatcher(inputQueryAction(e.currentTarget.value))}
-        style={{ gridRow: "3", gridColumn: "1/3", fontSize: "16px" }}
+        style={{ fontSize: "16px" }}
       />
     </Grid>
   );
