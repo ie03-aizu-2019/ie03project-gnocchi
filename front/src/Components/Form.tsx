@@ -19,20 +19,25 @@ export default ({ mode }: FormProps) => {
 
   return (
     <Grid rows={["1fr", "1fr"]} columns={["1fr"]}>
-      <Grid rows={["repeat(5, 32px)"]} columns={["1fr"]} gap="8px">
-        {(["Add", "Remove", "DrawLine", "Move", "ShowPath"] as Mode[]).map(
-          (x, i) => {
-            return (
-              <Button
-                key={i}
-                onClick={() => dispatcher(changeModeAction(x))}
-                disabled={mode === x}
-              >
-                {x}
-              </Button>
-            );
-          }
-        )}
+      <Grid rows={["repeat(6, 32px)"]} columns={["1fr"]} gap="8px">
+        {([
+          "Add",
+          "AddedPoint",
+          "Remove",
+          "DrawLine",
+          "Move",
+          "ShowPath"
+        ] as Mode[]).map((x, i) => {
+          return (
+            <Button
+              key={i}
+              onClick={() => dispatcher(changeModeAction(x))}
+              disabled={mode === x}
+            >
+              {x}
+            </Button>
+          );
+        })}
       </Grid>
       {mode === "ShowPath" ? (
         <Grid

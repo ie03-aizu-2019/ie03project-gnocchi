@@ -41,8 +41,7 @@ export default ({ ...props }: DisplayProps) => {
               mouseMoveAction(
                 placeToSvgSpace({
                   x: e.nativeEvent.offsetX,
-                  y: e.nativeEvent.offsetY,
-                  isAdded: false
+                  y: e.nativeEvent.offsetY
                 })
               )
             )
@@ -53,8 +52,7 @@ export default ({ ...props }: DisplayProps) => {
           mouseClickAction(
             placeToSvgSpace({
               x: e.nativeEvent.offsetX,
-              y: e.nativeEvent.offsetY,
-              isAdded: false
+              y: e.nativeEvent.offsetY
             })
           )
         )
@@ -90,10 +88,32 @@ export default ({ ...props }: DisplayProps) => {
           key={i}
           index={i + 1}
           onMouseDown={e => (
-            e.stopPropagation(), dispatcher(selectPointAction(i))
+            e.stopPropagation(), dispatcher(selectPointAction(i, false))
           )}
           color={
-            x.isAdded ? "blue" : state.selectPoint === i ? "green" : undefined
+            state.selectPoint &&
+            !state.selectPoint.isAdded &&
+            i === state.selectPoint.index
+              ? "green"
+              : "red"
+          }
+        />
+      ))}
+      {state.addedPlaces.map((x, i) => (
+        <Point
+          place={x}
+          size={0.1}
+          key={i}
+          index={i + 1}
+          onMouseDown={e => (
+            e.stopPropagation(), dispatcher(selectPointAction(i, true))
+          )}
+          color={
+            state.selectPoint &&
+            state.selectPoint.isAdded &&
+            i === state.selectPoint.index
+              ? "green"
+              : "blue"
           }
         />
       ))}

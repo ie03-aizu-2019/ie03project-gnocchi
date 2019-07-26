@@ -2,7 +2,13 @@ import * as React from "react";
 import styled from "styled-components";
 
 import { ReducerContext } from "../Reducer";
-import { importAction, inputQueryAction, toAPIAction, Action } from "../Action";
+import {
+  importAction,
+  inputQueryAction,
+  toAPIAction,
+  randomAction,
+  Action
+} from "../Action";
 
 import Button from "./Button";
 import Grid from "./Grid";
@@ -55,7 +61,7 @@ export default ({ query }: IOProps) => {
       </Button>
       <Button>ShortestPaths</Button>
       <Button>Highway detection</Button>
-      <Button>Random</Button>
+      <Button onClick={() => dispatcher(randomAction())}>Random</Button>
       <Button onClick={() => dispatcher(importAction())}>Inport</Button>
       <Textarea
         value={query}
