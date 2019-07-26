@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Place } from "../Reducer";
+import { Place } from "../State";
 
 type PointProps = {
   place: Place;

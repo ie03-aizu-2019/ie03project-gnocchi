@@ -1,14 +1,13 @@
 import * as React from "react";
 
+import { ReducerContext } from "../Reducer";
+import { Place } from "../State";
 import {
-  Place,
-  Action,
   mouseMoveAction,
   mouseClickAction,
   selectPointAction,
-  mouseUpAction,
-  ReducerContext
-} from "../Reducer";
+  mouseUpAction
+} from "../Action";
 import Line from "./Line";
 import Point from "./Point";
 
@@ -26,6 +25,10 @@ export default ({ ...props }: DisplayProps) => {
     [props.width, props.height],
     [props.viewWidth, props.viewHeight]
   );
+
+  const routes = state.shortestPathKey
+    ? state.shortestPaths[state.shortestPathKey][state.shortestPath]
+    : null;
 
   return (
     <svg
@@ -65,8 +68,21 @@ export default ({ ...props }: DisplayProps) => {
           from={state.places[from]}
           to={state.places[to]}
           width={0.05}
+          isShowLength={true}
         />
       ))}
+      {routes
+        ? routes.path.map(([from, to], i) => (
+            <Line
+              key={i}
+              from={state.places[from]}
+              to={state.places[to]}
+              width={0.05}
+              color="#4488ff"
+              isShowLength={false}
+            />
+          ))
+        : null}
       {state.places.map((x, i) => (
         <Point
           place={x}
