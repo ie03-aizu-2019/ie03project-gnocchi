@@ -3,7 +3,6 @@ package phase2
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"testing"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
@@ -417,14 +416,11 @@ func TestJoinRoads(t *testing.T) {
 	}
 
 	result := joinRoads(head, tail)
-	if result == nil || !reflect.DeepEqual(roads, result) {
-		t.Fatal("test joinRoads failed!")
-	}
 
 	for i := range roads {
 		if i < len(result) {
 			for j := range roads[i] {
-				if len(result[i]) < j || result[i][j] != roads[i][j] {
+				if len(result[i]) < j || result[i][j].Id != roads[i][j].Id {
 					t.Fatal("test joinRoads failed!")
 				}
 			}
@@ -459,7 +455,7 @@ func TestIsUniq(t *testing.T) {
 		&model.Road{Id: 3, To: places[2], From: places[3]},
 	}
 
-	if !isUniq(roads, aRoads) {
+	if isUniq(roads, aRoads) {
 		t.Fatal("isUnique failed")
 	}
 

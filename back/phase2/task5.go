@@ -141,10 +141,18 @@ func roadsLen(rs []*model.Road) (result float64) {
 
 func isUniq(base [][]*model.Road, item []*model.Road) bool {
 	for _, rs := range base {
-		if reflect.DeepEqual(rs, item) {
+		flg := true
+		for i := range rs {
+			if len(item) <= i || rs[i].Id != item[i].Id {
+				flg = false
+				break
+			}
+		}
+		if flg {
 			return false
 		}
 	}
+
 	return true
 }
 
