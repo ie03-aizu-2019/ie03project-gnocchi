@@ -18,7 +18,7 @@ func ConnectOnRoadPoints(roads []*model.Road, places []*model.Place) []*model.Ro
 			if onTheRoad(p, roads[i]) {
 				r := roads[i]
 				remove(&roads, i)
-				roads = append(roads, makeRoads(r, p)...)
+				roads = append(roads, makeRoads(r, p, len(roads))...)
 			}
 		}
 
@@ -27,6 +27,8 @@ func ConnectOnRoadPoints(roads []*model.Road, places []*model.Place) []*model.Ro
 		}
 
 	}
+
+	roadIdReregistration(&roads)
 
 	return roads
 }
@@ -49,8 +51,8 @@ func EnumerateCrossPoints(roads []*model.Road) ([]*model.Road, []*model.Place) {
 				crossPoint := &model.Place{Id: "X", Coord: *p}
 				crossPoints = append(crossPoints, crossPoint)
 
-				roads = append(roads, makeRoads(&road1, crossPoint)...)
-				roads = append(roads, makeRoads(&road2, crossPoint)...)
+				roads = append(roads, makeRoads(&road1, crossPoint, len(roads))...)
+				roads = append(roads, makeRoads(&road2, crossPoint, len(roads))...)
 
 				flag = true
 				break
@@ -63,6 +65,7 @@ func EnumerateCrossPoints(roads []*model.Road) ([]*model.Road, []*model.Place) {
 	}
 
 	idReregistration(crossPoints)
+	roadIdReregistration(&roads)
 
 	return roads, crossPoints
 }
@@ -75,15 +78,15 @@ func remove(s *[]*model.Road, i int) {
 	*s = append((*s)[:i], (*s)[i+1:]...)
 }
 
-func makeRoads(r *model.Road, p *model.Place) []*model.Road {
+func makeRoads(r *model.Road, p *model.Place, n int) []*model.Road {
 	return []*model.Road{
 		{
-			Id:   0,
+			Id:   n,
 			From: r.From,
 			To:   p,
 		},
 		{
-			Id:   0,
+			Id:   n + 1,
 			From: p,
 			To:   r.To,
 		},
@@ -124,4 +127,10 @@ func onTheRoad(place *model.Place, road *model.Road) bool {
 	p2eLen := placeToEnd.Length()
 	dot := (placeToStart.X*placeToEnd.X + placeToStart.Y*placeToEnd.Y) / (p2sLen * p2eLen)
 	return utils.NearEqual(dot, -1)
+}
+
+func roadIdReregistration(roads *[]*model.Road) {
+	for i, r := range *roads {
+		r.Id = i
+	}
 }
