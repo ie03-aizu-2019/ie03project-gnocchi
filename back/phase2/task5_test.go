@@ -2,13 +2,19 @@ package phase2
 
 import (
 	"fmt"
-	"log"
+	"strings"
 	"testing"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 	"github.com/uzimaru0000/ie03project-gnocchi/back/phase1"
 	"github.com/uzimaru0000/ie03project-gnocchi/back/utils"
 )
+
+func toFormat(num float64) string {
+	k := len(fmt.Sprintf("%d", int(num)))
+	temp := fmt.Sprintf("%%.%df", 6-k)
+	return strings.TrimRight(fmt.Sprintf(temp, num), "0")
+}
 
 func task5(file string) string {
 
@@ -27,7 +33,6 @@ func task5(file string) string {
 	roads, places := phase1.EnumerateCrossPoints(roads)
 
 	result := ""
-
 	for _, q := range datas.Queries {
 		routes := calcKthShortestPath(*q, append(datas.Places, places...), roads)
 		if len(routes) == 0 {
@@ -36,16 +41,11 @@ func task5(file string) string {
 		}
 		for _, rs := range routes {
 			sum := 0.0
-			// str := ""
 			for _, r := range rs {
-				// str += fmt.Sprintf("%s -> %s, ", r.From.Id, r.To.Id)
 				sum += r.Length()
 			}
-			result += fmt.Sprintf("%.5f\n", sum)
-			// log.Println(str)
-			// log.Println("----")
+			result += toFormat(sum) + "\n"
 		}
-		log.Println("============next================")
 	}
 	return result
 }
@@ -54,7 +54,7 @@ func TestTask5Case1(t *testing.T) {
 	utils.Assert("phase2/task5/case1", task5, t)
 }
 
-func aTestTask5Case2(t *testing.T) {
+func TestTask5Case2(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
 		&model.Place{Id: "1", Coord: model.Point{X: 2, Y: 0}},
@@ -97,7 +97,7 @@ func aTestTask5Case2(t *testing.T) {
 
 }
 
-func aTestTask5Case3(t *testing.T) {
+func TestTask5Case3(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -129,14 +129,6 @@ func aTestTask5Case3(t *testing.T) {
 	}
 
 	result := calcKthShortestPath(q, places, roads)
-
-	// for _, rs := range result {
-	// 	str := ""
-	// 	for _, r := range rs {
-	// 		str += fmt.Sprintf("%s -> %s , ", r.From.Id, r.To.Id)
-	// 	}
-	// 	log.Println(str)
-	// }
 
 	if len(ans) != len(result) {
 		t.Fatal("not equal task5Case3")

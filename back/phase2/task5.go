@@ -186,7 +186,6 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 	shortests := utils.Dijkstra(start, places, roads)[*dest]
 	pq := make(PriorityQueue, len(shortests))
 	for i, ss := range shortests {
-		// visited = setVisited(visited, ss)
 		for i, sr := range ss {
 			if i > 0 {
 				visited = setVisited(visited, ss[:i], sr)
@@ -200,15 +199,7 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 	}
 	heap.Init(&pq)
 
-	for true {
-		if pq.Len() <= 0 {
-			log.Println("break with pq empty")
-			break
-		}
-		if len(result) >= k {
-			log.Println("break with result.len >= k")
-			break
-		}
+	for pq.Len() > 0 && len(result) < k {
 
 		baseItem, ok := heap.Pop(&pq).(*Item)
 
@@ -216,19 +207,12 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 			log.Print("pop failed")
 		}
 		baseRoute := baseItem.roads
-		log.Println("pop item.route : ", road2String(baseRoute))
 		if isUniq(result, baseRoute) {
 			result = append(result, baseRoute)
 			for i, br := range baseRoute {
-				if i > 0 {
-					visited = setVisited(visited, baseRoute[:i], br)
-				}
+				visited = setVisited(visited, baseRoute[:i], br)
 			}
-			// visited = setVisited(visited, baseRoute)
-			// log.Println("base : ", road2String(baseRoute))
-			// log.Println("========")
 		} else {
-			// log.Println("not unique!")
 			continue
 		}
 
@@ -237,7 +221,6 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 		for _, r := range baseRoute {
 			notWork := r
 			dijp := places
-			// dijr := avoidRoads(roads, spurRoot)
 			dijr := avoidSpurRoot(roads, spurRoot, spurNode)
 			dijr = avoidRoad(dijr, notWork)
 			if v, ok := visited[road2String(spurRoot)]; ok {
@@ -245,35 +228,25 @@ func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 					dijr = avoidRoad(dijr, visitedRoad)
 				}
 			}
-			// log.Println("dijr : ", road2String(dijr))
-			// log.Println("spurN : ", spurNode.Id)
-			// log.Println("spurR : ", road2String(spurRoot))
 
 			shortestPath := utils.Dijkstra(spurNode, dijp, dijr)[*dest]
 			if len(shortestPath) == 0 {
 				spurNode = nextPlace(spurNode, r)
 				spurRoot = append(spurRoot, r)
-				// log.Println("continue")
-				// log.Println("--------")
 				continue
 			}
 
 			for _, sp := range shortestPath {
 				sproad := append(spurRoot, sp...)
-				// TODO: priority queueに入れる前にユニークか調べる必要あるかも
-				// log.Println("short : ", road2String(sp))
 				item := &Item{
 					roads:    sproad,
 					priority: roadsLen(sproad),
-					// index:    pq.Len(),
 				}
 				heap.Push(&pq, item)
 			}
 			spurNode = nextPlace(spurNode, r)
 			spurRoot = append(spurRoot, r)
-			// log.Println("--------")
 		}
-		// log.Println("=========")
 	}
 
 	return
