@@ -2,6 +2,7 @@ package phase2
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"testing"
 
@@ -36,13 +37,16 @@ func task5(file string) string {
 		}
 		for _, rs := range routes {
 			sum := 0.0
+			// str := ""
 			for _, r := range rs {
+				// str += fmt.Sprintf("%s -> %s, ", r.From.Id, r.To.Id)
 				sum += r.Length()
 			}
 			result += fmt.Sprintf("%.5f\n", sum)
+			// log.Println(str)
 			// log.Println("----")
 		}
-		// log.Println("=====")
+		log.Println("============next================")
 	}
 	return result
 }
@@ -75,12 +79,26 @@ func aTestTask5Case2(t *testing.T) {
 
 	result := calcKthShortestPath(model.Query{Start: "0", Dest: "3", Num: 3}, places, roads)
 
-	if !reflect.DeepEqual(ans, result) {
+	if len(ans) != len(result) {
 		t.Fatal("task5 Case2 Not Equal")
+	} else {
+		for i := range ans {
+			if len(ans[i]) == len(result[i]) {
+				for j := range ans[i] {
+					if ans[i][j].Id != result[i][j].Id {
+						t.Fatal("task5 Case2 Not Equal")
+					}
+				}
+			} else {
+				t.Fatal("task5 Case2 Not Equal")
+
+			}
+		}
 	}
+
 }
 
-func TestTask5Case3(t *testing.T) {
+func aTestTask5Case3(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -121,14 +139,26 @@ func TestTask5Case3(t *testing.T) {
 	// 	log.Println(str)
 	// }
 
-	if !reflect.DeepEqual(ans, result) {
+	if len(ans) != len(result) {
 		t.Fatal("not equal task5Case3")
+	} else {
+		for i := range ans {
+			if len(ans[i]) == len(result[i]) {
+				for j := range ans[i] {
+					if ans[i][j].Id != result[i][j].Id {
+						t.Fatal("not equal task5Case3")
+					}
+				}
+			} else {
+				t.Fatal("not equal task5Case3")
+
+			}
+		}
 	}
 
 }
 
 func TestSetVisit(t *testing.T) {
-	mp := map[model.Place]([]*model.Road){}
 	places := []*model.Place{
 		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
 		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
@@ -143,24 +173,65 @@ func TestSetVisit(t *testing.T) {
 		&model.Road{Id: 3, To: places[2], From: places[3]},
 		&model.Road{Id: 4, To: places[3], From: places[4]},
 	}
-	mp[*places[0]] = []*model.Road{roads[0], roads[3]}
-	mp[*places[2]] = []*model.Road{roads[1], roads[3]}
+	mp := map[string]([]*model.Road){}
+	ans := map[string]([]*model.Road){}
 
-	add := []*model.Road{
-		&model.Road{Id: 1, To: places[0], From: places[2]},
+	key1 := roads[1:3]
+	val1 := []*model.Road{roads[0], roads[3]}
+
+	key2 := roads[2:4]
+	val2 := []*model.Road{roads[4]}
+
+	key3 := []*model.Road{
+		&model.Road{Id: 2, To: places[1], From: places[2]},
 		&model.Road{Id: 3, To: places[2], From: places[3]},
 	}
+	val3 := roads[4]
 
-	ans := map[model.Place]([]*model.Road){
-		*places[0]: []*model.Road{roads[0], roads[3], roads[1]},
-		*places[2]: {roads[1], roads[3]},
-		*places[3]: {roads[3]},
+	mp[road2String(key1)] = val1
+	ans[road2String(key1)] = val1
+	ans[road2String(key2)] = val2
+
+	mp = setVisited(mp, key3, val3)
+
+	for k := range ans {
+		if len(ans[k]) == len(mp[k]) {
+			for i := range ans[k] {
+				if ans[k][i].Id != mp[k][i].Id {
+					t.Fatal("not Equal!")
+				}
+			}
+		} else {
+			t.Fatal("not Equal!")
+		}
+	}
+}
+
+func TestRoad2String(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "1", Coord: model.Point{X: 1, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 0, Y: 1}},
+		&model.Place{Id: "3", Coord: model.Point{X: 0, Y: 2}},
+		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
+	}
+	roads1 := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
+	}
+	roads2 := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+		&model.Road{Id: 4, To: places[3], From: places[4]},
 	}
 
-	mp = setVisited(mp, add)
-
-	if !reflect.DeepEqual(mp, ans) {
-		t.Fatal("failed set visit")
+	if road2String(roads1) != road2String(roads2) {
+		t.Fatal("not Equal!")
 	}
 }
 
@@ -184,10 +255,14 @@ func TestAvoidPlaces(t *testing.T) {
 		&model.Place{Id: "4", Coord: model.Point{X: 2, Y: 2}},
 	}
 
-	result := avoidPlaces(places, avoid, places[0])
+	ext := &model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}}
 
-	if !reflect.DeepEqual(result, anser) {
-		t.Fatal("test avoidPlace failed!")
+	result := avoidPlaces(places, avoid, ext)
+
+	for i := range anser {
+		if i > len(result) || anser[i].Id != result[i].Id {
+			t.Fatal("test avoidPlace failed!")
+		}
 	}
 }
 
@@ -220,8 +295,10 @@ func TestAvoidRoads(t *testing.T) {
 
 	result := avoidRoads(roads, avoid)
 
-	if !reflect.DeepEqual(result, anser) {
-		t.Fatal("test avoidRoads failed!")
+	for i := range anser {
+		if i > len(result) || anser[i].Id != result[i].Id {
+			t.Fatal("test avoidPlace failed!")
+		}
 	}
 }
 
@@ -253,8 +330,10 @@ func TestAvoidSpurRoot(t *testing.T) {
 
 	result := avoidSpurRoot(roads, avoid, places[3])
 
-	if !reflect.DeepEqual(anser, result) {
-		t.Fatal("avoid SpurRoot failed")
+	for i := range anser {
+		if i > len(result) || anser[i].Id != result[i].Id {
+			t.Fatal("avoid SpurRoot failed")
+		}
 	}
 
 }
@@ -268,7 +347,7 @@ func TestNextPlace(t *testing.T) {
 
 	result := nextPlace(places[0], r)
 
-	if !reflect.DeepEqual(result, places[1]) {
+	if result.Id != places[1].Id {
 		t.Fatal("test nextPlace faild!")
 	}
 }
@@ -291,7 +370,7 @@ func TestAvoidRoad(t *testing.T) {
 
 	avoid := &model.Road{Id: 0, To: places[0], From: places[1]}
 
-	ans := []*model.Road{
+	anser := []*model.Road{
 		&model.Road{Id: 1, To: places[0], From: places[2]},
 		&model.Road{Id: 2, To: places[1], From: places[2]},
 		&model.Road{Id: 3, To: places[2], From: places[3]},
@@ -300,8 +379,10 @@ func TestAvoidRoad(t *testing.T) {
 
 	result := avoidRoad(roads, avoid)
 
-	if !reflect.DeepEqual(result, ans) {
-		t.Fatal("test avoidRoad failed!")
+	for i := range anser {
+		if i > len(result) || anser[i].Id != result[i].Id {
+			t.Fatal("test avoidRoad failed!")
+		}
 	}
 
 }
@@ -339,6 +420,18 @@ func TestJoinRoads(t *testing.T) {
 	if result == nil || !reflect.DeepEqual(roads, result) {
 		t.Fatal("test joinRoads failed!")
 	}
+
+	for i := range roads {
+		if i < len(result) {
+			for j := range roads[i] {
+				if len(result[i]) < j || result[i][j] != roads[i][j] {
+					t.Fatal("test joinRoads failed!")
+				}
+			}
+		} else {
+			t.Fatal("test joinRoads failed!")
+		}
+	}
 }
 
 func TestIsUniq(t *testing.T) {
@@ -359,7 +452,14 @@ func TestIsUniq(t *testing.T) {
 		},
 	}
 
-	if isUniq(roads, roads[0]) {
+	aRoads := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[1]},
+		&model.Road{Id: 1, To: places[0], From: places[2]},
+		&model.Road{Id: 2, To: places[1], From: places[2]},
+		&model.Road{Id: 3, To: places[2], From: places[3]},
+	}
+
+	if !isUniq(roads, aRoads) {
 		t.Fatal("isUnique failed")
 	}
 
