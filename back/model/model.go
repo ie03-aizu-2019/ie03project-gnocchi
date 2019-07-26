@@ -40,7 +40,7 @@ func (p Point) ToString() string {
 }
 
 func (p Place) ToString() string {
-	return p.Coord.ToString()
+	return p.Id
 }
 func (r Road) ToString() string {
 	return fmt.Sprintf("%d %s %s", r.Id, r.From.Id, r.To.Id)

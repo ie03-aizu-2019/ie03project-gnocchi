@@ -43,56 +43,56 @@ func TestTask4Case1(t *testing.T) {
 }
 
 func TestSortPaths(t *testing.T) {
-	path := [][]model.Road{
+	path := [][]*model.Road{
 		{
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "A"},
 				From: &model.Place{Id: "B"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "B"},
 				From: &model.Place{Id: "D"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "D"},
 				From: &model.Place{Id: "F"},
 			},
 		},
 		{
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "A"},
 				From: &model.Place{Id: "B"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "B"},
 				From: &model.Place{Id: "C"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "C"},
 				From: &model.Place{Id: "D"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "D"},
 				From: &model.Place{Id: "F"},
 			},
 		},
 		{
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "A"},
 				From: &model.Place{Id: "E"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "E"},
 				From: &model.Place{Id: "D"},
 			},
-			model.Road{
+			&model.Road{
 				To:   &model.Place{Id: "D"},
 				From: &model.Place{Id: "F"},
 			},
 		},
 	}
 
-	ans := [][]model.Road{
+	ans := [][]*model.Road{
 		path[1],
 		path[0],
 		path[2],
