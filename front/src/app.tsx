@@ -1,7 +1,8 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import reduser, { init, ReducerContext } from "./Reducer";
+import reduser, { ReducerContext } from "./Reducer";
+import { init } from "./State";
 import Form from "./Components/Form";
 import Display from "./Components/Display";
 import IO from "./Components/IO";

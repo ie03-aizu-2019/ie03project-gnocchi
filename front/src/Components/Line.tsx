@@ -5,6 +5,7 @@ type LineProps = {
   to: { x: number; y: number };
   width: number;
   color?: string;
+  isShowLength: boolean;
 };
 
 export default ({ color = "black", ...props }: LineProps) => {
@@ -21,19 +22,29 @@ export default ({ color = "black", ...props }: LineProps) => {
         stroke={color}
         strokeWidth={props.width}
       />
-      <defs>
-        <path
-          d={`M${props.from.x},${props.from.y - 2 * props.width} L${
-            props.to.x
-          },${props.to.y - 2 * props.width}`}
-          id={`line${rand}`}
-        />
-      </defs>
-      <text fontSize={props.width * 5}>
-        <textPath href={`#line${rand}`} textAnchor="middle" startOffset="50%">
-          {len}
-        </textPath>
-      </text>
+      {props.isShowLength ? (
+        <>
+          <defs>
+            <path
+              d={`M${props.from.x},${props.from.y - 2 * props.width} L${
+                props.to.x
+              },${props.to.y - 2 * props.width}`}
+              id={`line${rand}`}
+            />
+          </defs>
+          <text fontSize={props.width * 5}>
+            <textPath
+              href={`#line${rand}`}
+              textAnchor="middle"
+              startOffset="50%"
+            >
+              {len}
+            </textPath>
+          </text>
+        </>
+      ) : (
+        ""
+      )}
     </>
   );
 };
