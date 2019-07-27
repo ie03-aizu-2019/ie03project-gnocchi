@@ -28,9 +28,8 @@ func task5(file string) string {
 		return err.Error()
 	}
 
-	roads := phase1.ConnectOnRoadPoints(datas.Roads, datas.Places)
-
-	roads, places := phase1.EnumerateCrossPoints(roads)
+	roads, places := phase1.EnumerateCrossPoints(datas.Roads)
+	roads = phase1.ConnectOnRoadPoints(roads, append(datas.Places, places...))
 
 	result := ""
 	for _, q := range datas.Queries {
