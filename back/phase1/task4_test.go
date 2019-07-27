@@ -22,6 +22,7 @@ func task4(file string) string {
 	}
 
 	roads, places := EnumerateCrossPoints(datas.Roads)
+	roads = ConnectOnRoadPoints(roads, append(datas.Places, places...))
 
 	result := ""
 
