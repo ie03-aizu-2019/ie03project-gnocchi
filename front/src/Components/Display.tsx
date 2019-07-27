@@ -1,14 +1,13 @@
 import * as React from "react";
 
+import { ReducerContext } from "../Reducer";
+import { Place } from "../State";
 import {
-  Place,
-  Action,
   mouseMoveAction,
   mouseClickAction,
   selectPointAction,
-  mouseUpAction,
-  ReducerContext
-} from "../Reducer";
+  mouseUpAction
+} from "../Action";
 import Line from "./Line";
 import Point from "./Point";
 
@@ -27,6 +26,10 @@ export default ({ ...props }: DisplayProps) => {
     [props.viewWidth, props.viewHeight]
   );
 
+  const routes = state.shortestPathKey
+    ? state.shortestPaths[state.shortestPathKey][state.shortestPath]
+    : null;
+
   return (
     <svg
       width={`${props.viewWidth}px`}
@@ -38,8 +41,7 @@ export default ({ ...props }: DisplayProps) => {
               mouseMoveAction(
                 placeToSvgSpace({
                   x: e.nativeEvent.offsetX,
-                  y: e.nativeEvent.offsetY,
-                  isAdded: false
+                  y: e.nativeEvent.offsetY
                 })
               )
             )
@@ -50,8 +52,7 @@ export default ({ ...props }: DisplayProps) => {
           mouseClickAction(
             placeToSvgSpace({
               x: e.nativeEvent.offsetX,
-              y: e.nativeEvent.offsetY,
-              isAdded: false
+              y: e.nativeEvent.offsetY
             })
           )
         )
@@ -59,14 +60,28 @@ export default ({ ...props }: DisplayProps) => {
       onMouseUp={() => dispatcher(mouseUpAction())}
       style={{ border: "1px solid black" }}
     >
-      {state.roads.map(([from, to], i) => (
+      {state.roads.map(({ edge, isHighWay }, i) => (
         <Line
           key={i}
-          from={state.places[from]}
-          to={state.places[to]}
+          from={state.places[edge[0]]}
+          to={state.places[edge[1]]}
           width={0.05}
+          isShowLength={true}
+          color={isHighWay ? "#ff8844" : "black"}
         />
       ))}
+      {routes
+        ? routes.path.map(([from, to], i) => (
+            <Line
+              key={i}
+              from={state.places[from]}
+              to={state.places[to]}
+              width={0.05}
+              color="#4488ff"
+              isShowLength={false}
+            />
+          ))
+        : null}
       {state.places.map((x, i) => (
         <Point
           place={x}
@@ -74,10 +89,32 @@ export default ({ ...props }: DisplayProps) => {
           key={i}
           index={i + 1}
           onMouseDown={e => (
-            e.stopPropagation(), dispatcher(selectPointAction(i))
+            e.stopPropagation(), dispatcher(selectPointAction(i, false))
           )}
           color={
-            x.isAdded ? "blue" : state.selectPoint === i ? "green" : undefined
+            state.selectPoint &&
+            !state.selectPoint.isAdded &&
+            i === state.selectPoint.index
+              ? "green"
+              : "red"
+          }
+        />
+      ))}
+      {state.addedPlaces.map((x, i) => (
+        <Point
+          place={x}
+          size={0.1}
+          key={i}
+          index={i + 1}
+          onMouseDown={e => (
+            e.stopPropagation(), dispatcher(selectPointAction(i, true))
+          )}
+          color={
+            state.selectPoint &&
+            state.selectPoint.isAdded &&
+            i === state.selectPoint.index
+              ? "green"
+              : "blue"
           }
         />
       ))}
