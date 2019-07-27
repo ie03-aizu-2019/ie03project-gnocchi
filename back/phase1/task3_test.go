@@ -20,6 +20,7 @@ func task3(file string) string {
 	}
 
 	roads, places := EnumerateCrossPoints(datas.Roads)
+	roads = ConnectOnRoadPoints(roads, append(datas.Places, places...))
 
 	var result string
 	for _, query := range datas.Queries {

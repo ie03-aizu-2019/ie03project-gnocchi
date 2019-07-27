@@ -20,13 +20,12 @@ func task6(file string) string {
 		return err.Error()
 	}
 
-	roads := phase1.ConnectOnRoadPoints(datas.Roads, datas.Places)
-
-	roads, places := phase1.EnumerateCrossPoints(roads)
+	roads, crossPoints := phase1.EnumerateCrossPoints(datas.Roads)
+	roads = phase1.ConnectOnRoadPoints(roads, append(datas.Places, crossPoints...))
 
 	result := ""
 	for _, q := range datas.Queries {
-		routes := calcKthShortestPath(*q, append(datas.Places, places...), roads)
+		routes := calcKthShortestPath(*q, append(datas.Places, crossPoints...), roads)
 		if len(routes) == 0 {
 			result += fmt.Sprintln("NA")
 			continue
