@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -18,6 +19,7 @@ func main() {
 	http.HandleFunc("/", healthCheck)
 	http.HandleFunc("/enumCrossPoints", cors(guard(parser(enumerateCrossPoints))))
 	http.HandleFunc("/recomendCrossPoints", cors(guard(parser(recomendClossPoints))))
+	http.HandleFunc("/detectionHighWays", cors(guard(parser(detectionHighWays))))
 
 	log.Printf("The server is running at http://localhost:5000")
 	http.ListenAndServe(":5000", nil)
@@ -84,11 +86,12 @@ func enumerateCrossPoints(w http.ResponseWriter, query string) {
 		return
 	}
 
-	roads := phase1.ConnectOnRoadPoints(datas.Roads, datas.Places)
-	roads, places := phase1.EnumerateCrossPoints(roads)
+	roads, crossPoints := phase1.EnumerateCrossPoints(datas.Roads)
+	places := append(datas.Places, crossPoints...)
+	roads = phase1.ConnectOnRoadPoints(roads, places)
 
 	datas.Roads = roads
-	datas.Places = append(datas.Places, places...)
+	datas.Places = places
 
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
 }
@@ -130,4 +133,39 @@ func recomendClossPoints(w http.ResponseWriter, query string) {
 	datas.Places = append(datas.Places, places...)
 
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
+}
+
+func detectionHighWays(w http.ResponseWriter, query string) {
+	datas, err := utils.ParseData(query)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	roads, _ := phase1.EnumerateCrossPoints(datas.Roads)
+	highWays := phase2.DetectBridge(roads)
+
+	preData := [][]string{}
+	for from, dests := range highWays {
+		for _, to := range dests {
+			var highWay []string
+			if from.Id < to.Id {
+				highWay = []string{from.Id, to.Id}
+			} else {
+				highWay = []string{to.Id, from.Id}
+			}
+
+			preData = append(preData, highWay)
+		}
+	}
+
+	json, err := json.Marshal(preData)
+	if err != nil {
+		log.Print(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(json))
 }

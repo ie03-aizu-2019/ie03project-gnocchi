@@ -11,6 +11,11 @@ export type Place = {
   y: number;
 };
 
+export type Road = {
+  edge: [number, number];
+  isHighWay: boolean;
+};
+
 export type Query = {
   start: string;
   end: string;
@@ -29,7 +34,7 @@ export type State = {
   shortestPath: number;
   testQuery: string;
   places: Place[];
-  roads: [number, number][];
+  roads: Road[];
   addedPlaces: Place[];
   queries: Query[];
   shortestPaths: { [key: string]: Route[] };

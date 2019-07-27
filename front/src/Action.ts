@@ -59,6 +59,11 @@ type Random = {
   readonly type_: "Random";
 };
 
+type DetectionHighWays = {
+  readonly type_: "DetectionHighWays";
+  highWays: [number, number][];
+};
+
 export type Action =
   | MouseMove
   | MouseUp
@@ -71,7 +76,8 @@ export type Action =
   | ToAPI
   | SelectShortestPaths
   | SelectShortestPath
-  | Random;
+  | Random
+  | DetectionHighWays;
 
 export const mouseMoveAction = (p: Place): MouseMove => ({
   type_: "MouseMove",
@@ -124,3 +130,10 @@ export const selectShortestPath = (index: number): SelectShortestPath => ({
 });
 
 export const randomAction = (): Random => ({ type_: "Random" });
+
+export const detectionHighWaysAction = (
+  highWays: [number, number][]
+): DetectionHighWays => ({
+  type_: "DetectionHighWays",
+  highWays
+});

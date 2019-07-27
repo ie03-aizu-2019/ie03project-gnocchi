@@ -1,16 +1,19 @@
 import { createContext, Dispatch } from "react";
 
 import { Action } from "./Action";
-import { Place, Query, State } from "./State";
+import { Place, Road, Query, State } from "./State";
 
 const exportQuery = (
   places: Place[],
-  roads: [number, number][],
+  roads: Road[],
   addedPlaces: Place[],
   queries: Query[]
 ): string => {
   const placesStr = places.map(p => `${p.x} ${p.y}`).join("\n");
-  const roadsStr = roads.map(([f, t]) => `${f + 1} ${t + 1}`).join("\n");
+  const roadsStr = roads
+    .map(x => x.edge)
+    .map(([f, t]) => `${f + 1} ${t + 1}`)
+    .join("\n");
   const addedPlacesStr = addedPlaces.map(p => `${p.x} ${p.y}`).join("\n");
   const queriesStr = queries
     .map(({ start, end, num }) => `${start} ${end} ${num}`)
@@ -22,9 +25,7 @@ const exportQuery = (
 ${[placesStr, roadsStr, addedPlacesStr, queriesStr].join("\n")}`;
 };
 
-const importQuery = (
-  query: string
-): [Place[], [number, number][], Place[], Query[]] => {
+const importQuery = (query: string): [Place[], Road[], Place[], Query[]] => {
   const lines = query.split("\n");
   const [p, r, a, q] = lines[0].split(" ").map(Number);
 
@@ -36,7 +37,8 @@ const importQuery = (
   const roads = lines
     .slice(p + 1, r + p + 1)
     .map(x => x.split(" ").map(Number))
-    .map(([f, t]) => [f - 1, t - 1] as [number, number]);
+    .map(([f, t]) => [f - 1, t - 1] as [number, number])
+    .map(x => ({ edge: x, isHighWay: false }));
 
   const addedPlaces = lines
     .slice(r + p + 1, r + p + a + 1)
@@ -120,15 +122,15 @@ export default (state: State, action: Action): State => {
 
       const roads = [...Array(N).fill(null)]
         .map((_, i) => {
-          const r = [] as [number, number][];
+          const r = [] as Road[];
           for (let n = 0; n < N - i - 1; n++) {
             if (Math.random() < 0.5) {
-              r.push([i, n + i + 1]);
+              r.push({ edge: [i, n + i + 1], isHighWay: false });
             }
           }
           return r;
         })
-        .reduce((acc, x) => acc.concat(x));
+        .reduce((acc, x) => acc.concat(x), []);
 
       const testQuery = exportQuery(places, roads, addedPlaces, state.queries);
 
@@ -139,6 +141,21 @@ export default (state: State, action: Action): State => {
         addedPlaces,
         testQuery
       };
+    }
+
+    case "DetectionHighWays": {
+      const roads = state.roads.map(({ edge }) => ({
+        edge,
+        isHighWay: action.highWays
+          .map(([f, t]) => [f - 1, t - 1])
+          .some(
+            ([f, t]) =>
+              (edge[0] === f && edge[1] === t) ||
+              (edge[1] === f && edge[0] === t)
+          )
+      }));
+
+      return { ...state, roads };
     }
 
     // Modeで挙動を変える
@@ -193,17 +210,17 @@ const modableReduser = (state: State, action: Action): State => {
           ? state.roads
               .filter(
                 x =>
-                  !x
+                  !x.edge
                     .map(y => y === action.pointIndex)
                     .reduce((acc, y) => acc || y)
               )
-              .map(
-                x =>
-                  x.map(y => (y > action.pointIndex ? y - 1 : y)) as [
-                    number,
-                    number
-                  ]
-              )
+              .map(x => ({
+                ...x,
+                edge: x.edge.map(y => (y > action.pointIndex ? y - 1 : y)) as [
+                  number,
+                  number
+                ]
+              }))
           : state.roads;
 
         const testQuery = exportQuery(
@@ -226,7 +243,13 @@ const modableReduser = (state: State, action: Action): State => {
         ) {
           const roads = [
             ...state.roads,
-            [state.selectPoint.index, action.pointIndex] as [number, number]
+            {
+              edge: [state.selectPoint.index, action.pointIndex] as [
+                number,
+                number
+              ],
+              isHighWay: false
+            }
           ];
           const testQuery = exportQuery(
             state.places,

@@ -60,13 +60,14 @@ export default ({ ...props }: DisplayProps) => {
       onMouseUp={() => dispatcher(mouseUpAction())}
       style={{ border: "1px solid black" }}
     >
-      {state.roads.map(([from, to], i) => (
+      {state.roads.map(({ edge, isHighWay }, i) => (
         <Line
           key={i}
-          from={state.places[from]}
-          to={state.places[to]}
+          from={state.places[edge[0]]}
+          to={state.places[edge[1]]}
           width={0.05}
           isShowLength={true}
+          color={isHighWay ? "#ff8844" : "black"}
         />
       ))}
       {routes

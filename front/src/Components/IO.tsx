@@ -7,12 +7,17 @@ import {
   inputQueryAction,
   toAPIAction,
   randomAction,
-  Action
+  Action,
+  detectionHighWaysAction
 } from "../Action";
 
 import Button from "./Button";
 import Grid from "./Grid";
-import Caller, { EnumCrossPoints, RecomendCrossPoints } from "../ApiCall";
+import Caller, {
+  EnumCrossPoints,
+  RecomendCrossPoints,
+  DetectionHighWays
+} from "../ApiCall";
 
 type IOProps = {
   query: string;
@@ -44,6 +49,25 @@ const recomendCrossPointsCall = async (
   dispatcher(toAPIAction(newQuery));
 };
 
+const detectionHighWaysCall = async (
+  query: string,
+  dispatcher: React.Dispatch<Action>
+) => {
+  const highWays = await Caller(DetectionHighWays, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: query
+  }).then((x: string) => JSON.parse(x) as string[][]);
+
+  dispatcher(
+    detectionHighWaysAction(
+      highWays
+        .map(xs => xs.map(Number))
+        .map(([f, t]) => [f, t] as [number, number])
+    )
+  );
+};
+
 export default ({ query }: IOProps) => {
   const { dispatcher } = React.useContext(ReducerContext);
 
@@ -60,7 +84,9 @@ export default ({ query }: IOProps) => {
         RecomendCrossPoints
       </Button>
       <Button>ShortestPaths</Button>
-      <Button>Highway detection</Button>
+      <Button onClick={() => detectionHighWaysCall(query, dispatcher)}>
+        Highway detection
+      </Button>
       <Button onClick={() => dispatcher(randomAction())}>Random</Button>
       <Button onClick={() => dispatcher(importAction())}>Inport</Button>
       <Textarea
