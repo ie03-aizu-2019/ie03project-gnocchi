@@ -1,8 +1,11 @@
 package phase2
 
 import (
+	"fmt"
 	"math"
 	"sort"
+
+	"github.com/uzimaru0000/ie03project-gnocchi/back/utils"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
@@ -35,6 +38,7 @@ func distance(place1 *model.Point, place2 *model.Point) float64 {
 	return (&model.Point{X: place1.X - place2.X, Y: place1.Y - place2.Y}).Length()
 }
 
+// RecomendClossPoint : 現在の道から最短になる点を探す関数
 func RecomendClossPoint(roads []*model.Road, places []*model.Place) []*model.Point {
 	result := make([]*model.Point, len(places))
 
@@ -43,6 +47,40 @@ func RecomendClossPoint(roads []*model.Road, places []*model.Place) []*model.Poi
 	}
 
 	return result
+}
+
+// CreateRecomendRoads : 現在の道から最短になる点を探し，その点から道を作成する関数
+func CreateRecomendRoads(places []*model.Place, roads []*model.Road, addedPlaces []*model.Place) ([]*model.Road, []*model.Place) {
+	recomendRoads := []*model.Road{}
+	recomendPlaces := []*model.Place{}
+
+	points := RecomendClossPoint(roads, addedPlaces)
+	recomendPlaceID := 1
+	for i, p := range points {
+		if same, place := isSamePoint(p, places); same {
+			recomendRoads = append(recomendRoads, &model.Road{
+				Id:   len(roads) + i,
+				From: place,
+				To:   addedPlaces[i],
+			})
+		} else {
+			recomendPlace := &model.Place{
+				Id:    fmt.Sprintf("R%d", recomendPlaceID),
+				Coord: *p,
+			}
+
+			recomendRoads = append(recomendRoads, &model.Road{
+				Id:   len(roads) + i,
+				From: recomendPlace,
+				To:   addedPlaces[i],
+			})
+			recomendPlaces = append(recomendPlaces, recomendPlace)
+
+			recomendPlaceID++
+		}
+	}
+
+	return recomendRoads, recomendPlaces
 }
 
 func calcMinRoad(roads []*model.Road, place *model.Place) *model.Point {
@@ -58,4 +96,13 @@ func calcMinRoad(roads []*model.Road, place *model.Place) *model.Point {
 	})
 	// 0番目の値を採用する（最小値）
 	return minRoads[0]
+}
+
+func isSamePoint(point *model.Point, places []*model.Place) (bool, *model.Place) {
+	for _, p := range places {
+		if utils.NearEqual(point.X, p.Coord.X) && utils.NearEqual(point.Y, p.Coord.Y) {
+			return true, p
+		}
+	}
+	return false, nil
 }
