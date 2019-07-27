@@ -72,6 +72,26 @@ func TestDistance(t *testing.T) {
 	}
 }
 
+func TestIsSamePoint(t *testing.T) {
+	point := &model.Point{
+		X: 1.23,
+		Y: 4.56,
+	}
+	places := []*model.Place{
+		&model.Place{
+			Id: "X",
+			Coord: model.Point{
+				X: 1.23,
+				Y: 4.56,
+			},
+		},
+	}
+
+	if same, _ := isSamePoint(point, places); !same {
+		t.Fatal("this case is same point")
+	}
+}
+
 func TestTask7Case1(t *testing.T) {
 	utils.Assert("phase2/task7/case1", task7, t)
 }
