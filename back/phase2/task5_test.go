@@ -33,7 +33,7 @@ func task5(file string) string {
 
 	result := ""
 	for _, q := range datas.Queries {
-		routes := calcKthShortestPath(*q, append(datas.Places, places...), roads)
+		routes := CalcKthShortestPath(*q, append(datas.Places, places...), roads)
 		if len(routes) == 0 {
 			result += fmt.Sprintln("NA")
 			continue
@@ -75,7 +75,7 @@ func TestTask5Case2(t *testing.T) {
 		[]*model.Road{roads[0], roads[4]},
 	}
 
-	result := calcKthShortestPath(model.Query{Start: "0", Dest: "3", Num: 3}, places, roads)
+	result := CalcKthShortestPath(model.Query{Start: "0", Dest: "3", Num: 3}, places, roads)
 
 	if len(ans) != len(result) {
 		t.Fatal("task5 Case2 Not Equal")
@@ -127,7 +127,7 @@ func TestTask5Case3(t *testing.T) {
 		[]*model.Road{roads[1], roads[3], roads[7], roads[6], roads[5]},
 	}
 
-	result := calcKthShortestPath(q, places, roads)
+	result := CalcKthShortestPath(q, places, roads)
 
 	if len(ans) != len(result) {
 		t.Fatal("not equal task5Case3")

@@ -25,7 +25,7 @@ func task6(file string) string {
 
 	result := ""
 	for _, q := range datas.Queries {
-		routes := calcKthShortestPath(*q, append(datas.Places, crossPoints...), roads)
+		routes := CalcKthShortestPath(*q, append(datas.Places, crossPoints...), roads)
 		if len(routes) == 0 {
 			result += fmt.Sprintln("NA")
 			continue
