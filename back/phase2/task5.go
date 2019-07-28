@@ -169,7 +169,7 @@ func setVisited(mp map[string]([]*model.Road), key []*model.Road, value *model.R
 	return mp
 }
 
-func calcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Road) (result [][]*model.Road) {
+func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Road) (result [][]*model.Road) {
 	k := q.Num
 	var start, dest *model.Place
 	for _, p := range places {

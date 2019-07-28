@@ -1,4 +1,4 @@
-import { Mode, Place } from "./State";
+import { Mode, Place, Route } from "./State";
 
 type MouseMove = {
   readonly type_: "MouseMove";
@@ -64,6 +64,11 @@ type DetectionHighWays = {
   highWays: [number, number][];
 };
 
+type ShortestPaths = {
+  readonly type_: "ShortestPaths";
+  shortestPaths: { [key: string]: Route[] };
+};
+
 export type Action =
   | MouseMove
   | MouseUp
@@ -77,7 +82,8 @@ export type Action =
   | SelectShortestPaths
   | SelectShortestPath
   | Random
-  | DetectionHighWays;
+  | DetectionHighWays
+  | ShortestPaths;
 
 export const mouseMoveAction = (p: Place): MouseMove => ({
   type_: "MouseMove",
@@ -136,4 +142,11 @@ export const detectionHighWaysAction = (
 ): DetectionHighWays => ({
   type_: "DetectionHighWays",
   highWays
+});
+
+export const shortestPathsAction = (shortestPaths: {
+  [key: string]: Route[];
+}): ShortestPaths => ({
+  type_: "ShortestPaths",
+  shortestPaths
 });

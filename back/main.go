@@ -17,9 +17,10 @@ import (
 
 func main() {
 	http.HandleFunc("/", healthCheck)
-	http.HandleFunc("/enumCrossPoints", cors(guard(parser(enumerateCrossPoints))))
-	http.HandleFunc("/recomendCrossPoints", cors(guard(parser(recomendClossPoints))))
+	http.HandleFunc("/enumCrossPoints", cors(guard(parser(enumerateCrossPointsHandler))))
+	http.HandleFunc("/recomendCrossPoints", cors(guard(parser(recomendClossPointsHandler))))
 	http.HandleFunc("/detectionHighWays", cors(guard(parser(detectionHighWays))))
+	http.HandleFunc("/shortestPath", cors(guard(parser(shortestPathHandler))))
 
 	log.Printf("The server is running at http://localhost:5000")
 	http.ListenAndServe(":5000", nil)
@@ -52,7 +53,7 @@ func guard(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func parser(handler func(http.ResponseWriter, string)) http.HandlerFunc {
+func parser(handler func(http.ResponseWriter, *utils.Datas)) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		//To allocate slice for request body
 		length, err := strconv.Atoi(req.Header.Get("Content-Length"))
@@ -71,7 +72,13 @@ func parser(handler func(http.ResponseWriter, string)) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "text/plain")
 
-		handler(w, string(body))
+		datas, err := utils.ParseData(string(body))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		handler(w, datas)
 	}
 }
 
@@ -79,51 +86,21 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Server running")
 }
 
-func enumerateCrossPoints(w http.ResponseWriter, query string) {
-	datas, err := utils.ParseData(query)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+func enumerateCrossPointsHandler(w http.ResponseWriter, datas *utils.Datas) {
+	enumerateCrossPoints(datas)
+	fmt.Fprint(w, utils.DatasToQuerys(*datas))
+}
 
-	roads, crossPoints := phase1.EnumerateCrossPoints(datas.Roads)
-	places := append(datas.Places, crossPoints...)
-	roads = phase1.ConnectOnRoadPoints(roads, places)
-
-	datas.Roads = roads
-	datas.Places = places
+func recomendClossPointsHandler(w http.ResponseWriter, datas *utils.Datas) {
+	enumerateCrossPoints(datas)
+	recomendClossPoints(datas)
 
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
 }
 
-func recomendClossPoints(w http.ResponseWriter, query string) {
-	datas, err := utils.ParseData(query)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	recomendRoads, recomendPlaces := phase2.CreateRecomendRoads(datas.Places, datas.Roads, datas.AddPlaces)
-
-	recomendPlaces = append(recomendPlaces, datas.AddPlaces...)
-	datas.Places = append(datas.Places, recomendPlaces...)
-	datas.Roads = append(datas.Roads, recomendRoads...)
-	datas.AddPlaces = []*model.Place{}
-
-	roads := phase1.ConnectOnRoadPoints(datas.Roads, datas.Places)
-	roads, places := phase1.EnumerateCrossPoints(roads)
-	datas.Roads = roads
-	datas.Places = append(datas.Places, places...)
-
-	fmt.Fprint(w, utils.DatasToQuerys(*datas))
-}
-
-func detectionHighWays(w http.ResponseWriter, query string) {
-	datas, err := utils.ParseData(query)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+func detectionHighWays(w http.ResponseWriter, datas *utils.Datas) {
+	enumerateCrossPoints(datas)
+	recomendClossPoints(datas)
 
 	roads, _ := phase1.EnumerateCrossPoints(datas.Roads)
 	highWays := phase2.DetectBridge(roads)
@@ -145,6 +122,58 @@ func detectionHighWays(w http.ResponseWriter, query string) {
 	json, err := json.Marshal(preData)
 	if err != nil {
 		log.Print(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(json))
+}
+
+func shortestPathHandler(w http.ResponseWriter, datas *utils.Datas) {
+	enumerateCrossPoints(datas)
+	recomendClossPoints(datas)
+
+	shortestPaths := make(map[string][][]*model.Road)
+	for _, q := range datas.Queries {
+		key := fmt.Sprintf("%s %s %d", q.Start, q.Dest, q.Num)
+		shortestPaths[key] = phase2.CalcKthShortestPath(*q, datas.Places, datas.Roads)
+	}
+
+	// IDの再割り振り
+	for i, place := range datas.Places {
+		place.Id = fmt.Sprint(i)
+	}
+	for i, road := range datas.Roads {
+		road.Id = i
+	}
+
+	type jsonData struct {
+		Paths map[string][][][]string `json:"paths"`
+		Query string                  `json:"query"`
+	}
+
+	result := new(jsonData)
+	result.Query = utils.DatasToQuerys(*datas)
+	result.Paths = make(map[string][][][]string)
+	for key, paths := range shortestPaths {
+		result.Paths[key] = make([][][]string, len(paths))
+		for i, path := range paths {
+			result.Paths[key][i] = make([][]string, len(path))
+			for j, road := range path {
+				var r []string
+				if road.From.Id < road.To.Id {
+					r = []string{road.From.Id, road.To.Id}
+				} else {
+					r = []string{road.To.Id, road.From.Id}
+				}
+				result.Paths[key][i][j] = r
+			}
+		}
+	}
+
+	json, err := json.Marshal(*result)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
