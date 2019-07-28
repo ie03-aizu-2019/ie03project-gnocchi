@@ -158,6 +158,9 @@ export default (state: State, action: Action): State => {
       return { ...state, roads };
     }
 
+    case "ShortestPaths":
+      return { ...state, shortestPaths: action.shortestPaths };
+
     // Modeで挙動を変える
     default:
       return modableReduser(state, action);

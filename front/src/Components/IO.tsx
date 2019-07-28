@@ -8,7 +8,8 @@ import {
   toAPIAction,
   randomAction,
   Action,
-  detectionHighWaysAction
+  detectionHighWaysAction,
+  shortestPathsAction
 } from "../Action";
 
 import Button from "./Button";
@@ -16,8 +17,10 @@ import Grid from "./Grid";
 import Caller, {
   EnumCrossPoints,
   RecomendCrossPoints,
-  DetectionHighWays
+  DetectionHighWays,
+  ShortestPath
 } from "../ApiCall";
+import { Route } from "../State";
 
 type IOProps = {
   query: string;
@@ -68,6 +71,42 @@ const detectionHighWaysCall = async (
   );
 };
 
+const shortestPathsCall = async (
+  query: string,
+  dispatcher: React.Dispatch<Action>
+) => {
+  const shortestPaths = await Caller(ShortestPath, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: query
+  }).then(
+    (x: string) =>
+      JSON.parse(x) as {
+        paths: { [key: string]: [string, string][][] };
+        query: string;
+      }
+  );
+
+  dispatcher(toAPIAction(shortestPaths.query));
+  dispatcher(
+    shortestPathsAction(
+      Object.keys(shortestPaths.paths).reduce((acc, x) => {
+        return {
+          ...acc,
+          [x]: shortestPaths.paths[x].map(
+            ys =>
+              ({
+                path: ys.map(
+                  ([f, t]) => [Number(f), Number(t)] as [number, number]
+                )
+              } as Route)
+          )
+        };
+      }, {})
+    )
+  );
+};
+
 export default ({ query }: IOProps) => {
   const { dispatcher } = React.useContext(ReducerContext);
 
@@ -83,9 +122,11 @@ export default ({ query }: IOProps) => {
       <Button onClick={() => recomendCrossPointsCall(query, dispatcher)}>
         RecomendCrossPoints
       </Button>
-      <Button>ShortestPaths</Button>
       <Button onClick={() => detectionHighWaysCall(query, dispatcher)}>
         Highway detection
+      </Button>
+      <Button onClick={() => shortestPathsCall(query, dispatcher)}>
+        ShortestPaths
       </Button>
       <Button onClick={() => dispatcher(randomAction())}>Random</Button>
       <Button onClick={() => dispatcher(importAction())}>Inport</Button>
