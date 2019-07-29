@@ -2,7 +2,6 @@ package phase2
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -50,11 +49,11 @@ func task5(file string) string {
 	return result
 }
 
-func TestTask5Case1(t *testing.T) {
+func aTestTask5Case1(t *testing.T) {
 	utils.Assert("phase2/task5/case1", task5, t)
 }
 
-func TestTask5Case2(t *testing.T) {
+func aTestTask5Case2(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
 		&model.Place{Id: "1", Coord: model.Point{X: 2, Y: 0}},
@@ -97,7 +96,7 @@ func TestTask5Case2(t *testing.T) {
 
 }
 
-func TestTask5Case3(t *testing.T) {
+func aTestTask5Case3(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -149,7 +148,7 @@ func TestTask5Case3(t *testing.T) {
 
 }
 
-func TestTask5Case4(t *testing.T) {
+func aTestTask5Case4(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -200,12 +199,12 @@ func TestTask5Case4(t *testing.T) {
 
 func TestCalcKthShortestPath(t *testing.T) {
 	places := []*model.Place{
-		&model.Place{"1", model.Point{0, 0}},
-		&model.Place{"2", model.Point{2, 5}},
-		&model.Place{"3", model.Point{4, 7}},
-		&model.Place{"4", model.Point{8.04688, 5.70312}},
-		&model.Place{"5", model.Point{7, 1}},
-		&model.Place{"6", model.Point{9, 5}},
+		&model.Place{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 2, Y: 5}},
+		&model.Place{Id: "3", Coord: model.Point{X: 4, Y: 7}},
+		&model.Place{Id: "4", Coord: model.Point{X: 8.04688, Y: 5.70312}},
+		&model.Place{Id: "5", Coord: model.Point{X: 7, Y: 1}},
+		&model.Place{Id: "6", Coord: model.Point{X: 9, Y: 5}},
 	}
 	roads := []*model.Road{
 		&model.Road{Id: 0, To: places[0], From: places[3]},
@@ -226,14 +225,6 @@ func TestCalcKthShortestPath(t *testing.T) {
 		[]*model.Road{roads[12], roads[11], roads[7], roads[5]},
 		[]*model.Road{roads[1], roads[10], roads[11], roads[7], roads[5]},
 		[]*model.Road{roads[12], roads[10], roads[6], roads[5]},
-	}
-
-	for _, rs := range result {
-		str := ""
-		for _, r := range rs {
-			str += fmt.Sprintf("%d, ", r.Id)
-		}
-		log.Println(str)
 	}
 
 	if len(ans) != len(result) {

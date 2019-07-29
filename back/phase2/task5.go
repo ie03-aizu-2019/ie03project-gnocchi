@@ -238,6 +238,7 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 
 			for _, sp := range shortestPath {
 				sproad := append(spurRoot, sp...)
+				log.Println("sproad : ", road2String(sproad))
 				item := &Item{
 					roads:    sproad,
 					priority: roadsLen(sproad),
