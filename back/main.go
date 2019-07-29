@@ -88,12 +88,15 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 
 func enumerateCrossPointsHandler(w http.ResponseWriter, datas *utils.Datas) {
 	enumerateCrossPoints(datas)
+	idReregistration(datas)
+
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
 }
 
 func recomendClossPointsHandler(w http.ResponseWriter, datas *utils.Datas) {
 	enumerateCrossPoints(datas)
 	recomendClossPoints(datas)
+	idReregistration(datas)
 
 	fmt.Fprint(w, utils.DatasToQuerys(*datas))
 }
@@ -101,6 +104,7 @@ func recomendClossPointsHandler(w http.ResponseWriter, datas *utils.Datas) {
 func detectionHighWays(w http.ResponseWriter, datas *utils.Datas) {
 	enumerateCrossPoints(datas)
 	recomendClossPoints(datas)
+	idReregistration(datas)
 
 	roads, _ := phase1.EnumerateCrossPoints(datas.Roads)
 	highWays := phase2.DetectBridge(roads)
@@ -133,19 +137,12 @@ func detectionHighWays(w http.ResponseWriter, datas *utils.Datas) {
 func shortestPathHandler(w http.ResponseWriter, datas *utils.Datas) {
 	enumerateCrossPoints(datas)
 	recomendClossPoints(datas)
+	idReregistration(datas)
 
 	shortestPaths := make(map[string][][]*model.Road)
 	for _, q := range datas.Queries {
 		key := fmt.Sprintf("%s %s %d", q.Start, q.Dest, q.Num)
 		shortestPaths[key] = phase2.CalcKthShortestPath(*q, datas.Places, datas.Roads)
-	}
-
-	// IDの再割り振り
-	for i, place := range datas.Places {
-		place.Id = fmt.Sprint(i)
-	}
-	for i, road := range datas.Roads {
-		road.Id = i
 	}
 
 	type jsonData struct {

@@ -6,6 +6,7 @@ type LineProps = {
   width: number;
   color?: string;
   isShowLength: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 };
 
 export default ({ color = "black", ...props }: LineProps) => {
@@ -21,6 +22,7 @@ export default ({ color = "black", ...props }: LineProps) => {
         d={`M${props.from.x},${props.from.y} L${props.to.x},${props.to.y}`}
         stroke={color}
         strokeWidth={props.width}
+        onClick={props.onClick}
       />
       {props.isShowLength ? (
         <>
