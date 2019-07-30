@@ -2,7 +2,6 @@ package phase2
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -50,11 +49,11 @@ func task5(file string) string {
 	return result
 }
 
-func aTestTask5Case1(t *testing.T) {
+func TestTask5Case1(t *testing.T) {
 	utils.Assert("phase2/task5/case1", task5, t)
 }
 
-func aTestTask5Case2(t *testing.T) {
+func TestTask5Case2(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},
 		&model.Place{Id: "1", Coord: model.Point{X: 2, Y: 0}},
@@ -97,7 +96,7 @@ func aTestTask5Case2(t *testing.T) {
 
 }
 
-func aTestTask5Case3(t *testing.T) {
+func TestTask5Case3(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -149,7 +148,7 @@ func aTestTask5Case3(t *testing.T) {
 
 }
 
-func aTestTask5Case4(t *testing.T) {
+func TestTask5Case4(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -224,13 +223,8 @@ func TestCalcKthShortestPath(t *testing.T) {
 	ans := [][]*model.Road{
 		[]*model.Road{roads[1], roads[6], roads[5]},
 		[]*model.Road{roads[12], roads[11], roads[7], roads[5]},
-		[]*model.Road{roads[1], roads[10], roads[11], roads[7], roads[5]},
 		[]*model.Road{roads[12], roads[10], roads[6], roads[5]},
-	}
-
-	for _, rs := range result {
-		log.Println(road2String(rs))
-
+		[]*model.Road{roads[1], roads[10], roads[11], roads[7], roads[5]},
 	}
 
 	if len(ans) != len(result) {
