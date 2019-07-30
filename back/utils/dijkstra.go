@@ -9,7 +9,7 @@ import (
 )
 
 type Item struct {
-	Place    model.Place
+	Place    *model.Place
 	Priority float64
 	Index    int
 }
@@ -30,11 +30,11 @@ func (pq PriorityQueue) Swap(i, j int) {
 	pq[j].Index = j
 }
 
-func (pq PriorityQueue) Push(x interface{}) {
-	n := len(pq)
+func (pq *PriorityQueue) Push(x interface{}) {
+	n := len(*pq)
 	item := x.(*Item)
 	item.Index = n
-	pq = append(pq, item)
+	*pq = append(*pq, item)
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
@@ -48,7 +48,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 
 func (pq *PriorityQueue) find(place model.Place) (*Item, error) {
 	for _, i := range *pq {
-		if i.Place == place {
+		if i.Place.Id == place.Id {
 			return (*Item)(i), nil
 		}
 	}
@@ -64,45 +64,46 @@ func (item *Item) update(dist float64) {
 // from:item -> to:reachItem
 // Update to point distance(priority), if it is shorter than the distance to next point.
 // if to point distance equal the form distance, push to routes.
-func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[model.Place]([][]*model.Road))) {
-	if dist := item.Priority + road.Length(); reachItem.Priority > dist {
-		reachItem.update(dist)
-		var route [][]*model.Road
-		if len((*routes)[item.Place]) > 0 {
-			for _, r := range (*routes)[item.Place] {
-				route = append(route, append(r, road))
-			}
-		} else {
-			route = [][]*model.Road{{road}}
-		}
-		(*routes)[reachItem.Place] = route
+func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *map[*model.Place]([][]*model.Road)) {
+	var newRoutes [][]*model.Road
+	if len((*routes)[item.Place]) > 0 {
+		newRoutes = make([][]*model.Road, len((*routes)[item.Place]))
 
-	} else if reachItem.Priority == dist {
-		for _, r := range (*routes)[item.Place] {
-			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], append(r, road))
+		for i, rs := range (*routes)[item.Place] {
+			newRoutes[i] = make([]*model.Road, len(rs))
+			for j, r := range rs {
+				newRoutes[i][j] = r
+			}
+			newRoutes[i] = append(newRoutes[i], road)
 		}
-		if len((*routes)[item.Place]) == 0 {
-			(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], []*model.Road{road})
-		}
+	} else {
+		newRoutes = [][]*model.Road{[]*model.Road{road}}
+	}
+
+	if dist := item.Priority + road.Length(); reachItem.Priority > dist { // now.priority + next.distance < next.prioritty
+		reachItem.update(dist)
+		(*routes)[reachItem.Place] = newRoutes
+	} else if NearEqual(reachItem.Priority, dist) { // 現在あるnextplaceへのpriority とdist が同じ
+		(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], newRoutes...)
 	}
 }
 
 // Dijkstra is algorithm search shortest path to each node from start node
 // args: start, places, roads, return:  map that key is each place which value is shortest route from start
-func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[model.Place]([][]*model.Road) {
+func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) map[*model.Place]([][]*model.Road) {
 	var inf = 1e30
 	pq := make(PriorityQueue, len(places))
 
-	routes := make(map[model.Place]([][]*model.Road), len(places))
+	routes := make(map[*model.Place]([][]*model.Road), len(places))
 
 	flg := true
 	for i, place := range places {
 		pq[i] = &Item{
-			Place:    *place,
+			Place:    place,
 			Priority: inf,
 			Index:    i,
 		}
-		routes[*place] = make([][]*model.Road, 0)
+		routes[place] = make([][]*model.Road, 0)
 
 		if place.Id == start.Id {
 			flg = false
@@ -122,14 +123,12 @@ func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) ma
 		}
 		for _, road := range roads {
 			if road.To.Id == i.Place.Id {
-
 				if reachItem, err := pq.find(*road.From); err == nil {
-					routeUpdate((*Item)(i), reachItem, road, &routes)
+					routeUpdate(i, reachItem, road, &routes)
 				}
-			}
-			if road.From.Id == i.Place.Id {
+			} else if road.From.Id == i.Place.Id {
 				if reachItem, err := pq.find(*road.To); err == nil {
-					routeUpdate((*Item)(i), reachItem, road, &routes)
+					routeUpdate(i, reachItem, road, &routes)
 				}
 			}
 		}
