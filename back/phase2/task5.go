@@ -186,6 +186,7 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 	shortests := utils.Dijkstra(start, places, roads)[*dest]
 	pq := make(PriorityQueue, len(shortests))
 	for i, ss := range shortests {
+		log.Println("1st : ", road2String(ss))
 		for i, sr := range ss {
 			if i > 0 {
 				visited = setVisited(visited, ss[:i], sr)
