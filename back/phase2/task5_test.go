@@ -148,6 +148,104 @@ func TestTask5Case3(t *testing.T) {
 
 }
 
+func TestTask5Case4(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{"1", model.Point{0, 0}},
+		&model.Place{"2", model.Point{0, 1}},
+		&model.Place{"3", model.Point{2, 0}},
+		&model.Place{"4", model.Point{1, 1}},
+		&model.Place{"5", model.Point{1, 3}},
+		&model.Place{"6", model.Point{3, 1}},
+		&model.Place{"7", model.Point{3, 2}},
+	}
+
+	roads := []*model.Road{
+		&model.Road{0, places[0], places[1]},
+		&model.Road{1, places[2], places[0]},
+		&model.Road{2, places[3], places[1]},
+		&model.Road{3, places[3], places[2]},
+		&model.Road{4, places[3], places[4]},
+		&model.Road{5, places[4], places[6]},
+		&model.Road{6, places[5], places[6]},
+		&model.Road{7, places[5], places[3]},
+	}
+
+	q := model.Query{Start: "1", Dest: "5", Num: 1}
+
+	ans := [][]*model.Road{
+		[]*model.Road{roads[0], roads[2], roads[4]},
+	}
+
+	result := CalcKthShortestPath(q, places, roads)
+
+	if len(ans) != len(result) {
+		t.Fatal("not equal task5Case4-1")
+	} else {
+		for i := range ans {
+			if len(ans[i]) == len(result[i]) {
+				for j := range ans[i] {
+					if ans[i][j].Id != result[i][j].Id {
+						t.Fatal("not equal task5Case4-2")
+					}
+				}
+			} else {
+				t.Fatal("not equal task5Case4-3")
+
+			}
+		}
+	}
+
+}
+
+func TestCalcKthShortestPath(t *testing.T) {
+	places := []*model.Place{
+		&model.Place{Id: "1", Coord: model.Point{X: 0, Y: 0}},
+		&model.Place{Id: "2", Coord: model.Point{X: 2, Y: 5}},
+		&model.Place{Id: "3", Coord: model.Point{X: 4, Y: 7}},
+		&model.Place{Id: "4", Coord: model.Point{X: 8.04688, Y: 5.70312}},
+		&model.Place{Id: "5", Coord: model.Point{X: 7, Y: 1}},
+		&model.Place{Id: "6", Coord: model.Point{X: 9, Y: 5}},
+	}
+	roads := []*model.Road{
+		&model.Road{Id: 0, To: places[0], From: places[3]},
+		&model.Road{Id: 1, To: places[0], From: places[5]},
+		&model.Road{Id: 2, To: places[1], From: places[4]},
+		&model.Road{Id: 3, To: places[2], From: places[4]},
+		&model.Road{Id: 4, To: places[3], From: places[5]},
+	}
+
+	q := model.Query{Start: "1", Dest: "4", Num: 4}
+
+	roads, crossPoints := phase1.EnumerateCrossPoints(roads)
+	roads = phase1.ConnectOnRoadPoints(roads, append(places, crossPoints...))
+	result := CalcKthShortestPath(q, append(places, crossPoints...), roads)
+
+	ans := [][]*model.Road{
+		[]*model.Road{roads[1], roads[6], roads[5]},
+		[]*model.Road{roads[12], roads[11], roads[7], roads[5]},
+		[]*model.Road{roads[12], roads[10], roads[6], roads[5]},
+		[]*model.Road{roads[1], roads[10], roads[11], roads[7], roads[5]},
+	}
+
+	if len(ans) != len(result) {
+		t.Fatal("not equal-1")
+	} else {
+		for i := range ans {
+			if len(ans[i]) == len(result[i]) {
+				for j := range ans[i] {
+					if ans[i][j].Id != result[i][j].Id {
+						t.Fatal("not equal 2")
+					}
+				}
+			} else {
+				t.Fatal("not equal 3")
+
+			}
+		}
+	}
+
+}
+
 func TestSetVisit(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{Id: "0", Coord: model.Point{X: 0, Y: 0}},

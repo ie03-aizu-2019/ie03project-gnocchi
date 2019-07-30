@@ -23,12 +23,12 @@ func CalcShortestPath(q model.Query, places []*model.Place, roads []*model.Road)
 	}
 
 	routes := utils.Dijkstra(start, places, roads)
-	if len(routes[*dest]) == 0 {
+	if len(routes[dest]) == 0 {
 		return 0, errors.New("NA")
 	}
 
 	dist := 0.0
-	for _, road := range routes[*dest][0] {
+	for _, road := range routes[dest][0] {
 		dist += road.Length()
 	}
 
