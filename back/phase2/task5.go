@@ -183,10 +183,10 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 
 	visited := map[string]([]*model.Road){}
 
-	shortests := utils.Dijkstra(start, places, roads)[*dest]
+	shortests := utils.Dijkstra(start, places, roads)[dest]
 	pq := make(PriorityQueue, len(shortests))
 	for i, ss := range shortests {
-		log.Println("1st : ", road2String(ss))
+		// log.Println("1st : ", road2String(ss))
 		for i, sr := range ss {
 			if i > 0 {
 				visited = setVisited(visited, ss[:i], sr)
@@ -203,7 +203,6 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 	for pq.Len() > 0 && len(result) < k {
 
 		baseItem, ok := heap.Pop(&pq).(*Item)
-
 		if !ok {
 			log.Print("pop failed")
 		}
@@ -230,7 +229,7 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 				}
 			}
 
-			shortestPath := utils.Dijkstra(spurNode, dijp, dijr)[*dest]
+			shortestPath := utils.Dijkstra(spurNode, dijp, dijr)[dest]
 			if len(shortestPath) == 0 {
 				spurNode = nextPlace(spurNode, r)
 				spurRoot = append(spurRoot, r)
@@ -239,7 +238,7 @@ func CalcKthShortestPath(q model.Query, places []*model.Place, roads []*model.Ro
 
 			for _, sp := range shortestPath {
 				sproad := append(spurRoot, sp...)
-				log.Println("sproad : ", road2String(sproad))
+				// log.Println("sproad : ", road2String(sproad))
 				item := &Item{
 					roads:    sproad,
 					priority: roadsLen(sproad),

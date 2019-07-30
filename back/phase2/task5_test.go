@@ -2,6 +2,7 @@ package phase2
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -227,18 +228,23 @@ func TestCalcKthShortestPath(t *testing.T) {
 		[]*model.Road{roads[12], roads[10], roads[6], roads[5]},
 	}
 
+	for _, rs := range result {
+		log.Println(road2String(rs))
+
+	}
+
 	if len(ans) != len(result) {
-		t.Fatal("not equal")
+		t.Fatal("not equal-1")
 	} else {
 		for i := range ans {
 			if len(ans[i]) == len(result[i]) {
 				for j := range ans[i] {
 					if ans[i][j].Id != result[i][j].Id {
-						t.Fatal("not equal")
+						t.Fatal("not equal 2")
 					}
 				}
 			} else {
-				t.Fatal("not equal")
+				t.Fatal("not equal 3")
 
 			}
 		}

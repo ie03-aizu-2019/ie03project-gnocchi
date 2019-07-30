@@ -29,16 +29,16 @@ func EnumerationShortestPath(q model.Query, places []*model.Place, roads []*mode
 	}
 
 	routes := utils.Dijkstra(start, places, roads)
-	if len(routes[*dest]) == 0 {
+	if len(routes[dest]) == 0 {
 		return nil, errors.New("NA")
 	}
 
 	route := new(route)
-	paths := routes[*dest]
+	paths := routes[dest]
 	sortPaths(paths, dest.Id)
 
 	route.path = paths[0]
-	for _, road := range routes[*dest][0] {
+	for _, road := range routes[dest][0] {
 		route.length += road.Length()
 	}
 

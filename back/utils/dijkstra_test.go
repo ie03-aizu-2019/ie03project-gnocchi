@@ -1,13 +1,12 @@
 package utils
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 )
 
-func aTestDijkstraCase1(t *testing.T) {
+func TestDijkstraCase1(t *testing.T) {
 
 	places := []*model.Place{
 		&model.Place{"0", model.Point{0, 0}},
@@ -35,14 +34,18 @@ func aTestDijkstraCase1(t *testing.T) {
 	result := Dijkstra(places[1], places, roads)
 
 	for k, v := range anser {
-		if !reflect.DeepEqual(v, result[k]) {
-			t.Fatal("testdijkstra not equal")
+		for i, rs := range v {
+			for j, r := range rs {
+				if r.Id != result[k][i][j].Id {
+					t.Fatal("dijkstraCase1 Failed")
+				}
+			}
 		}
 	}
 
 }
 
-func aTestDijkstraCase2(t *testing.T) {
+func TestDijkstraCase2(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -77,14 +80,18 @@ func aTestDijkstraCase2(t *testing.T) {
 	result := Dijkstra(places[1], places, roads)
 
 	for k, v := range anser {
-		if !reflect.DeepEqual(v, result[k]) {
-			t.Fatal("testdijkstra not equal")
+		for i, rs := range v {
+			for j, r := range rs {
+				if r.Id != result[k][i][j].Id {
+					t.Fatal("dijkstraCase2 Failed")
+				}
+			}
 		}
 	}
 
 }
 
-func aTestDijkstraCase3(t *testing.T) {
+func TestDijkstraCase3(t *testing.T) {
 	places := []*model.Place{
 		&model.Place{"1", model.Point{0, 0}},
 		&model.Place{"2", model.Point{0, 1}},
@@ -153,7 +160,6 @@ func TestDijkstraCase4(t *testing.T) {
 	for i := range result {
 		if len(result[i]) == len(ans[i]) {
 			for j := range result[i] {
-				// log.Printf("%d %d\n", result[i][j].Id, ans[i][j].Id)
 				if result[i][j].Id != ans[i][j].Id {
 					t.Fatal("dijkstra failed 2")
 				}

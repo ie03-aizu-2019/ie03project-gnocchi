@@ -3,7 +3,6 @@ package utils
 import (
 	"container/heap"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
@@ -65,31 +64,28 @@ func (item *Item) update(dist float64) {
 // from:item -> to:reachItem
 // Update to point distance(priority), if it is shorter than the distance to next point.
 // if to point distance equal the form distance, push to routes.
-func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *(map[*model.Place]([][]*model.Road))) {
-	newRoutes := [][]*model.Road{}
+func routeUpdate(item *Item, reachItem *Item, road *model.Road, routes *map[*model.Place]([][]*model.Road)) {
+	var newRoutes [][]*model.Road
 	if len((*routes)[item.Place]) > 0 {
-		for _, rs := range (*routes)[item.Place] {
-			newRoutes = append(newRoutes, append(rs, road))
-			log.Printf("before")
-			for key, val := range *routes {
-				log.Printf("%p : %v", key, val)
+		newRoutes = make([][]*model.Road, len((*routes)[item.Place]))
+
+		for i, rs := range (*routes)[item.Place] {
+			newRoutes[i] = make([]*model.Road, len(rs))
+			for j, r := range rs {
+				newRoutes[i][j] = r
 			}
+			newRoutes[i] = append(newRoutes[i], road)
 		}
 	} else {
-		newRoutes = append(newRoutes, []*model.Road{road})
+		newRoutes = [][]*model.Road{[]*model.Road{road}}
 	}
+
 	if dist := item.Priority + road.Length(); reachItem.Priority > dist { // now.priority + next.distance < next.prioritty
 		reachItem.update(dist)
 		(*routes)[reachItem.Place] = newRoutes
-
-		log.Printf("after")
-		for key, val := range *routes {
-			log.Printf("%p : %v", key, val)
-		}
 	} else if NearEqual(reachItem.Priority, dist) { // 現在あるnextplaceへのpriority とdist が同じ
 		(*routes)[reachItem.Place] = append((*routes)[reachItem.Place], newRoutes...)
 	}
-	log.Printf("reachI in routeUpdate : %s", reachItem.Place.Id)
 }
 
 // Dijkstra is algorithm search shortest path to each node from start node
@@ -125,41 +121,14 @@ func Dijkstra(start *model.Place, places []*model.Place, roads []*model.Road) ma
 		if i.Priority == inf {
 			break
 		}
-		log.Printf("place.id : %s : %p", i.Place.Id, i.Place)
 		for _, road := range roads {
 			if road.To.Id == i.Place.Id {
 				if reachItem, err := pq.find(*road.From); err == nil {
-					log.Printf("reachItem : %s : %p", reachItem.Place.Id, reachItem.Place)
 					routeUpdate(i, reachItem, road, &routes)
-
-					if len(routes[places[3]]) > 0 {
-						for _, rs := range routes[places[3]] {
-							str := ""
-							for _, r := range rs {
-								str += fmt.Sprintf("%d, ", r.Id)
-							}
-							log.Println(str)
-						}
-					} else {
-						log.Println("[]")
-					}
 				}
 			} else if road.From.Id == i.Place.Id {
 				if reachItem, err := pq.find(*road.To); err == nil {
-					log.Printf("reachItem : %s : %p", reachItem.Place.Id, reachItem.Place)
 					routeUpdate(i, reachItem, road, &routes)
-
-					if len(routes[places[3]]) > 0 {
-						for _, rs := range routes[places[3]] {
-							str := ""
-							for _, r := range rs {
-								str += fmt.Sprintf("%d, ", r.Id)
-							}
-							log.Println(str)
-						}
-					} else {
-						log.Println("[]")
-					}
 				}
 			}
 		}
