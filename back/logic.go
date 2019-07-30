@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/uzimaru0000/ie03project-gnocchi/back/model"
 	"github.com/uzimaru0000/ie03project-gnocchi/back/phase1"
 	"github.com/uzimaru0000/ie03project-gnocchi/back/phase2"
@@ -28,4 +30,19 @@ func recomendClossPoints(datas *utils.Datas) {
 	roads, places := phase1.EnumerateCrossPoints(roads)
 	datas.Roads = roads
 	datas.Places = append(datas.Places, places...)
+}
+
+func idReregistration(datas *utils.Datas) {
+	placeIDTable := make(map[string]string)
+	for i, place := range datas.Places {
+		placeIDTable[place.Id] = fmt.Sprint(i + 1)
+		place.Id = fmt.Sprint(i + 1)
+	}
+	for i, road := range datas.Roads {
+		road.Id = i
+	}
+	for _, query := range datas.Queries {
+		query.Start = placeIDTable[query.Start]
+		query.Dest = placeIDTable[query.Dest]
+	}
 }
