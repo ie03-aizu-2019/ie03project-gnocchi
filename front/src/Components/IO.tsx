@@ -36,7 +36,7 @@ const enumCrossPointsCall = async (
     body: query
   });
 
-  dispatcher(toAPIAction(newQuery));
+  dispatcher(toAPIAction(newQuery.trim()));
 };
 
 const recomendCrossPointsCall = async (
@@ -49,7 +49,7 @@ const recomendCrossPointsCall = async (
     body: query
   });
 
-  dispatcher(toAPIAction(newQuery));
+  dispatcher(toAPIAction(newQuery.trim()));
 };
 
 const detectionHighWaysCall = async (
@@ -87,7 +87,7 @@ const shortestPathsCall = async (
       }
   );
 
-  dispatcher(toAPIAction(shortestPaths.query));
+  dispatcher(toAPIAction(shortestPaths.query.trim()));
   dispatcher(
     shortestPathsAction(
       Object.keys(shortestPaths.paths).reduce((acc, x) => {
@@ -97,7 +97,7 @@ const shortestPathsCall = async (
             ys =>
               ({
                 path: ys.map(
-                  ([f, t]) => [Number(f), Number(t)] as [number, number]
+                  ([f, t]) => [Number(f) - 1, Number(t) - 1] as [number, number]
                 )
               } as Route)
           )

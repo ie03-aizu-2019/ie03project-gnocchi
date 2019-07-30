@@ -79,6 +79,7 @@ export default ({ ...props }: DisplayProps) => {
               width={0.05}
               color="#4488ff"
               isShowLength={false}
+              onClick={() => console.log("line clicked")}
             />
           ))
         : null}

@@ -9,20 +9,20 @@ const exportQuery = (
   addedPlaces: Place[],
   queries: Query[]
 ): string => {
-  const placesStr = places.map(p => `${p.x} ${p.y}`).join("\n");
+  const placesStr = places.map(p => `${p.x} ${p.y}\n`).join("");
   const roadsStr = roads
     .map(x => x.edge)
-    .map(([f, t]) => `${f + 1} ${t + 1}`)
-    .join("\n");
-  const addedPlacesStr = addedPlaces.map(p => `${p.x} ${p.y}`).join("\n");
+    .map(([f, t]) => `${f + 1} ${t + 1}\n`)
+    .join("");
+  const addedPlacesStr = addedPlaces.map(p => `${p.x} ${p.y}\n`).join("");
   const queriesStr = queries
-    .map(({ start, end, num }) => `${start} ${end} ${num}`)
-    .join("\n");
+    .map(({ start, end, num }) => `${start} ${end} ${num}\n`)
+    .join("");
 
   return `${places.length} ${roads.length} ${addedPlaces.length} ${
     queries.length
   }
-${[placesStr, roadsStr, addedPlacesStr, queriesStr].join("\n")}`;
+  ${[placesStr, roadsStr, addedPlacesStr, queriesStr].join("")}`.trim();
 };
 
 const importQuery = (query: string): [Place[], Road[], Place[], Query[]] => {
